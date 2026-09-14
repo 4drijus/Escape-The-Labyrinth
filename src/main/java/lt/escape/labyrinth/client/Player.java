@@ -1,6 +1,8 @@
 package lt.escape.labyrinth.client;
 
 public class Player {
+    private final int id;
+
     private double x;
     private double y;
 
@@ -9,18 +11,23 @@ public class Player {
 
     private boolean onGround;
 
-    public Player(double x, double y) {
+    public Player(int id, double x, double y) {
+        this.id = id;
         this.x = x;
         this.y = y;
         this.onGround = true;
     }
 
+    public int getId(){
+        return id;
+    }
+
     public void moveLeft() {
-        velocityX = -2;
+        velocityX = -4;
     }
 
     public void moveRight() {
-        velocityX = 2;
+        velocityX = 4;
     }
 
     public void stopHorizontalMovement() {
@@ -43,13 +50,21 @@ public class Player {
         y += velocityY;
 
         // Gravity
-        velocityY += 0.3;
+        velocityY += 0.5;
 
         // Ground collision
         if (y >= 480) {
             y = 480;
             velocityY = 0;
             onGround = true;
+        }
+
+        if (x < 0) {
+            x = 0;
+        }
+
+        if (x > 945) {
+            x = 945;
         }
     }
 
@@ -60,4 +75,5 @@ public class Player {
     public double getY() {
         return y;
     }
+
 }

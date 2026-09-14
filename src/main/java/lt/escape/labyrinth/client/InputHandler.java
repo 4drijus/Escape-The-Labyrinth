@@ -4,11 +4,13 @@ import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 
 public class InputHandler implements KeyListener {
-    private boolean left;
-    private boolean right;
+    private boolean player1Left;
+    private boolean player1Right;
+    private boolean player1jJump;
 
-    private boolean jumpPressed;
-
+    private boolean player2Left;
+    private boolean player2Right;
+    private boolean player2jJump;
 
     /**
      * Called when a keyboard key is pressed
@@ -17,9 +19,13 @@ public class InputHandler implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_A -> left = true;
-            case KeyEvent.VK_D -> right = true;
-            case KeyEvent.VK_SPACE -> jumpPressed = true;
+            case KeyEvent.VK_A -> player1Left = true;
+            case KeyEvent.VK_D -> player1Right = true;
+            case KeyEvent.VK_SPACE -> player1jJump = true;
+
+            case KeyEvent.VK_LEFT -> player2Left = true;
+            case KeyEvent.VK_RIGHT -> player2Right = true;
+            case KeyEvent.VK_UP -> player2jJump = true;
         }
     }
 
@@ -30,17 +36,33 @@ public class InputHandler implements KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_A -> left = false;
-            case KeyEvent.VK_D -> right = false;
+            case KeyEvent.VK_A -> player1Left = false;
+            case KeyEvent.VK_D -> player1Right = false;
+
+            case KeyEvent.VK_LEFT -> player2Left = false;
+            case KeyEvent.VK_RIGHT -> player2Right = false;
         }
     }
 
-    public boolean isLeft() {
-        return left;
+    @Override
+    public void keyTyped(KeyEvent e) {
+
     }
 
-    public boolean isRight() {
-        return right;
+    public boolean isPlayer1Left() {
+        return player1Left;
+    }
+
+    public boolean isPlayer2Left() {
+        return player2Left;
+    }
+
+    public boolean isPlayer1Right() {
+        return player1Right;
+    }
+
+    public boolean isPlayer2Right() {
+        return player2Right;
     }
 
     /**
@@ -48,11 +70,21 @@ public class InputHandler implements KeyListener {
      * Resets the value after detecting a jump so the same press is not added multiple times
      * @return true if space was pressed, otherwise false
      */
-    public boolean consumeJumpPressed() {
-        if (jumpPressed) {
-            jumpPressed = false;
+    public boolean consumePlayer1Jump() {
+        if (player1jJump) {
+            player1jJump = false;
             return true;
         }
         return false;
     }
+
+    public boolean consumePlayer2Jump() {
+        if (player2jJump) {
+            player2jJump = false;
+            return true;
+        }
+        return false;
+    }
+
+
 }

@@ -6,14 +6,17 @@ import java.awt.Graphics;
 import javax.swing.Timer;
 
 public class GamePanel extends JPanel {
-    private final Player player;
+    private final Player player1;
+    private final Player player2;
     private final InputHandler inputHandler;
     private final Timer gameTimer;
 
     public GamePanel() {
         setBackground(Color.DARK_GRAY);
 
-        player = new Player(500,480);
+        player1 = new Player(1, 500,480);
+        player2 = new Player(2, 100, 480);
+
         inputHandler = new InputHandler();
 
         addKeyListener(inputHandler);
@@ -26,19 +29,35 @@ public class GamePanel extends JPanel {
     }
 
     public void updateGame() {
-        if (inputHandler.isLeft()) {
-            player.moveLeft();
-        } else if (inputHandler.isRight()) {
-            player.moveRight();
+
+        // Player 1 input
+        if (inputHandler.isPlayer1Left()) {
+            player1.moveLeft();
+        } else if (inputHandler.isPlayer1Right()) {
+            player1.moveRight();
         } else {
-            player.stopHorizontalMovement();
+            player1.stopHorizontalMovement();
         }
 
-        if (inputHandler.consumeJumpPressed()) {
-            player.jump();
+        if (inputHandler.consumePlayer1Jump()) {
+            player1.jump();
         }
 
-        player.update();
+        // Player 2 input
+        if (inputHandler.isPlayer2Left()) {
+            player2.moveLeft();
+        } else if (inputHandler.isPlayer2Right()) {
+            player2.moveRight();
+        } else {
+            player2.stopHorizontalMovement();
+        }
+
+        if (inputHandler.consumePlayer2Jump()) {
+            player2.jump();
+        }
+
+        player1.update();
+        player2.update();
 
         repaint();
     }
@@ -51,11 +70,20 @@ public class GamePanel extends JPanel {
         g.setColor(Color.GREEN);
         g.fillRect(0, 520, getWidth(), 80);
 
-        //player
+        // Player 1
         g.setColor(Color.BLUE);
         g.fillRect(
-                (int) player.getX(),
-                (int) player.getY(),
+                (int) player1.getX(),
+                (int) player1.getY(),
+                40,
+                40
+        );
+
+        // Player 2
+        g.setColor(Color.RED);
+        g.fillRect(
+                (int) player2.getX(),
+                (int) player2.getY(),
                 40,
                 40
         );
