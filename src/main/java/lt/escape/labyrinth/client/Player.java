@@ -76,4 +76,7 @@ public class Player {
         return y;
     }
 
+    public void setX(double x) {
+        this.x = x;
+    }
 }
