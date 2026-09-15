@@ -14,21 +14,11 @@ public class InputHandler implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        int playerId = networkClient.getPlayerId();
 
-        if (playerId == 1) {
-            switch (e.getKeyCode()) {
-                case KeyEvent.VK_A -> networkClient.sendCommand(PlayerCommand.LEFT);
-                case KeyEvent.VK_D -> networkClient.sendCommand(PlayerCommand.RIGHT);
-                case KeyEvent.VK_SPACE -> networkClient.sendCommand(PlayerCommand.JUMP);
-            }
-
-        } else if (playerId == 2) {
-            switch (e.getKeyCode()) {
-                case KeyEvent.VK_LEFT -> networkClient.sendCommand(PlayerCommand.LEFT);
-                case KeyEvent.VK_RIGHT -> networkClient.sendCommand(PlayerCommand.RIGHT);
-                case KeyEvent.VK_UP -> networkClient.sendCommand(PlayerCommand.JUMP);
-            }
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_A -> networkClient.sendCommand(PlayerCommand.LEFT);
+            case KeyEvent.VK_D -> networkClient.sendCommand(PlayerCommand.RIGHT);
+            case KeyEvent.VK_SPACE -> networkClient.sendCommand(PlayerCommand.JUMP);
         }
     }
 
@@ -36,15 +26,8 @@ public class InputHandler implements KeyListener {
     public void keyReleased(KeyEvent e) {
         int playerId = networkClient.getPlayerId();
 
-        if (playerId == 1) {
-            if (e.getKeyCode() == KeyEvent.VK_A || e.getKeyCode() == KeyEvent.VK_D) {
-                networkClient.sendCommand(PlayerCommand.STOP);
-            }
-
-        } else if (playerId == 2) {
-            if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                networkClient.sendCommand(PlayerCommand.STOP);
-            }
+        if (e.getKeyCode() == KeyEvent.VK_A || e.getKeyCode() == KeyEvent.VK_D) {
+            networkClient.sendCommand(PlayerCommand.STOP);
         }
     }
 
