@@ -7,7 +7,7 @@ public class NetworkTest {
         NetworkClient networkClient = new NetworkClient();
         try {
             networkClient.connect("localhost", 5000);
-            System.out.println("Connection successful");
+            System.out.println("My player ID is: " + networkClient.getPlayerId());
         } catch (IOException e) {
             System.out.println("Could not connect to server");
             e.printStackTrace();
