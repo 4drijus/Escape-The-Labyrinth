@@ -1,3 +1,8 @@
+/*
+Not used, but keeping it won't hurt for now
+ */
+
+/*
 package lt.escape.labyrinth.client;
 
 public class Player {
@@ -41,10 +46,6 @@ public class Player {
         }
     }
 
-    /**
-     * Updates player position based on their velocity, applies gravity
-     * Checks if player has reached the ground and makes sure it doesnt fall through
-     */
     public void update() {
         x += velocityX;
         y += velocityY;
@@ -80,3 +81,4 @@ public class Player {
         this.x = x;
     }
 }
+*/
