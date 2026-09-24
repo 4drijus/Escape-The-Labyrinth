@@ -19,7 +19,7 @@ public class GameServer {
     public static void main(String[] args) {
         System.out.println("Starting the server");
 
-        gameState = new GameState();
+        gameState = GameState.getInstance();
         System.out.println("Game state created");
 
         Thread gameThread = new Thread(GameServer::gameLoop);
