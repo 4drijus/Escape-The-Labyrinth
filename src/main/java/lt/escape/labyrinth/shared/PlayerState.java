@@ -10,11 +10,16 @@ public class PlayerState {
 
     private boolean onGround;
 
+    private int health;
+
+    private static final int STARTING_HEALTH = 3;
+
     public PlayerState(int playerId, double x, double y) {
         this.playerId = playerId;
         this.x = x;
         this.y = y;
         this.onGround = true;
+        this.health = STARTING_HEALTH;
     }
 
     public int getPlayerId() {
@@ -41,6 +46,10 @@ public class PlayerState {
         return onGround;
     }
 
+    public int getHealth() {
+        return health;
+    }
+
     public void setX(double x) {
         this.x = x;
     }
@@ -60,4 +69,17 @@ public class PlayerState {
     public void setOnGround(boolean onGround) {
         this.onGround = onGround;
     }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public void takeDamage(int amount) {
+        this.health = Math.max(0, this.health - amount);
+    }
+
+    public boolean isAlive() {
+        return health > 0;
+    }
+
 }

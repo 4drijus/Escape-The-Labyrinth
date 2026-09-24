@@ -1,12 +1,17 @@
 package lt.escape.labyrinth.client;
 
 import lt.escape.labyrinth.shared.PlayerCommand;
+import lt.escape.labyrinth.shared.EnemyState;
+import lt.escape.labyrinth.shared.EnemyType;
+import lt.escape.labyrinth.shared.BulletState;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NetworkClient {
     private Socket socket;
@@ -61,8 +66,10 @@ public class NetworkClient {
 
     private void processGameState(String message) {
         try {
-            String data = message.substring("STATE:".length());
-            String[] values = data.split(",");
+            String[] sections = message.split("\\|");
+
+            String playerData = sections[0].substring("STATE:".length());
+            String[] values = playerData.split(",");
 
             double player1X = Double.parseDouble(values[1]);
             double player1Y = Double.parseDouble(values[2]);
@@ -70,9 +77,54 @@ public class NetworkClient {
             double player2Y = Double.parseDouble(values[5]);
 
             gameState.update(player1X, player1Y, player2X, player2Y);
+            gameState.updateEnemies(parseEnemies(sections));
+            gameState.updateBullets(parseBullets(sections));
         } catch (Exception e) {
             System.out.println("Invalid game state: " + message);
         }
+    }
+
+    private List<EnemyState> parseEnemies(String[] sections) {
+        List<EnemyState> enemies = new ArrayList<>();
+
+        if (sections.length <= 1) {
+            return enemies;
+        }
+
+        String data = sections[1].substring("ENEMIES:".length());
+        if (data.isEmpty()) {
+            return enemies;
+        }
+
+        for (String entry : data.split(";")) {
+            String[] fields = entry.split(",");
+            EnemyType type = EnemyType.valueOf(fields[0]);
+            double x = Double.parseDouble(fields[1]);
+            double y = Double.parseDouble(fields[2]);
+            enemies.add(new EnemyState(type, x, y));
+        }
+        return enemies;
+    }
+
+    private List<BulletState> parseBullets(String[] sections) {
+        List<BulletState> bullets = new ArrayList<>();
+
+        if (sections.length <= 2) {
+            return bullets;
+        }
+
+        String data = sections[2].substring("BULLETS:".length());
+        if (data.isEmpty()) {
+            return bullets;
+        }
+
+        for (String entry : data.split(";")) {
+            String[] fields = entry.split(",");
+            double x = Double.parseDouble(fields[0]);
+            double y = Double.parseDouble(fields[1]);
+            bullets.add(new BulletState(x, y));
+        }
+        return bullets;
     }
 
     public int getPlayerId() {

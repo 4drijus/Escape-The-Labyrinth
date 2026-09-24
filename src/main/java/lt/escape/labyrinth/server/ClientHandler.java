@@ -3,12 +3,15 @@ package lt.escape.labyrinth.server;
 import lt.escape.labyrinth.shared.GameState;
 import lt.escape.labyrinth.shared.PlayerCommand;
 import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.EnemyState;
+import lt.escape.labyrinth.shared.BulletState;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.List;
 
 public class ClientHandler implements Runnable {
     private final Socket socket;
@@ -90,14 +93,35 @@ public class ClientHandler implements Runnable {
         PlayerState player1 = gameState.getPlayer1();
         PlayerState player2 = gameState.getPlayer2();
 
-        String message =
-                "STATE:" +
-                        player1.getPlayerId() + "," +
-                        player1.getX() + "," +
-                        player1.getY() + "," +
-                        player2.getPlayerId() + "," +
-                        player2.getX() + "," +
-                        player2.getY();
+        StringBuilder message = new StringBuilder("STATE:");
+        message.append(player1.getPlayerId()).append(",")
+                .append(player1.getX()).append(",")
+                .append(player1.getY()).append(",")
+                .append(player2.getPlayerId()).append(",")
+                .append(player2.getX()).append(",")
+                .append(player2.getY());
+
+        message.append("|ENEMIES:");
+        List<EnemyState> enemies = gameState.getEnemies();
+        for (int i = 0; i < enemies.size(); i++) {
+            if (i > 0) {
+                message.append(";");
+            }
+            EnemyState enemy = enemies.get(i);
+            message.append(enemy.getType()).append(",")
+                    .append(enemy.getX()).append(",")
+                    .append(enemy.getY());
+        }
+
+        message.append("|BULLETS:");
+        List<BulletState> bullets = gameState.getBullets();
+        for (int i = 0; i < bullets.size(); i++) {
+            if (i > 0) {
+                message.append(";");
+            }
+            BulletState bullet = bullets.get(i);
+            message.append(bullet.getX()).append(",").append(bullet.getY());
+        }
 
         output.println(message);
     }
