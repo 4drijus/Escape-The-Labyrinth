@@ -5,10 +5,12 @@ import lt.escape.labyrinth.shared.PlayerState;
 
 public class NormalBullet extends Bullet {
 
+    private static final double SPEED = 300.0;
+
     private final int damage;
 
-    public NormalBullet(double x, double y, double velocityX, double velocityY, int damage) {
-        super(x, y, velocityX, velocityY);
+    public NormalBullet(double x, double y, double directionX, double directionY, int damage) {
+        super(x, y, directionX, directionY, SPEED);
         this.damage = damage;
     }
 

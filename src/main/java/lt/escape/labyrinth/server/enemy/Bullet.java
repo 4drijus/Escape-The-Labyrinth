@@ -22,11 +22,11 @@ public abstract class Bullet {
 
     private boolean active = true;
 
-    protected Bullet(double x, double y, double velocityX, double velocityY) {
+    protected Bullet(double x, double y, double directionX, double directionY, double speed) {
         this.x = x;
         this.y = y;
-        this.velocityX = velocityX;
-        this.velocityY = velocityY;
+        this.velocityX = directionX * speed;
+        this.velocityY = directionY * speed;
     }
 
     /** Called by the server when this bullet hits a player. */

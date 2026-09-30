@@ -14,20 +14,16 @@ import java.util.List;
  */
 public abstract class Turret extends Enemy {
 
-    protected static final double DEFAULT_BULLET_SPEED = 300.0;
-
     private final int firingIntervalMs;
-    private final double bulletSpeed;
     private long msSinceLastShot = 0;
 
-    protected Turret(double x, double y, int firingIntervalMs, double bulletSpeed) {
+    protected Turret(double x, double y, int firingIntervalMs) {
         super(x, y, new StationaryBehavior());
         this.firingIntervalMs = firingIntervalMs;
-        this.bulletSpeed = bulletSpeed;
     }
 
     /** Factory method: each concrete turret decides which Bullet it fires. */
-    protected abstract Bullet createBullet(double x, double y, double velocityX, double velocityY);
+    protected abstract Bullet createBullet(double x, double y, double directionX, double directionY);
 
     @Override
     public List<Bullet> update(List<PlayerState> players, double deltaTime) {
@@ -52,10 +48,10 @@ public abstract class Turret extends Enemy {
             length = 1; // avoid divide-by-zero if the turret sits on the player
         }
 
-        double velocityX = (dx / length) * bulletSpeed;
-        double velocityY = (dy / length) * bulletSpeed;
+        double directionX = dx / length;
+        double directionY = dy / length;
 
-        return createBullet(x, y, velocityX, velocityY);
+        return createBullet(x, y, directionX, directionY);
     }
 
     private PlayerState nearestPlayer(List<PlayerState> players) {

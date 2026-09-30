@@ -7,17 +7,13 @@ public class NormalTurret extends Turret {
     private final int damage;
 
     public NormalTurret(double x, double y, int damage, int firingIntervalMs) {
-        this(x, y, damage, firingIntervalMs, DEFAULT_BULLET_SPEED);
-    }
-
-    public NormalTurret(double x, double y, int damage, int firingIntervalMs, double bulletSpeed) {
-        super(x, y, firingIntervalMs, bulletSpeed);
+        super(x, y, firingIntervalMs);
         this.damage = damage;
     }
 
     @Override
-    protected Bullet createBullet(double x, double y, double velocityX, double velocityY) {
-        return new NormalBullet(x, y, velocityX, velocityY, damage);
+    protected Bullet createBullet(double x, double y, double directionX, double directionY) {
+        return new NormalBullet(x, y, directionX, directionY, damage);
     }
 
     @Override

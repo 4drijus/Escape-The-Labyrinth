@@ -5,8 +5,10 @@ import lt.escape.labyrinth.shared.PlayerState;
 
 public class InstaDeathBullet extends Bullet {
 
-    public InstaDeathBullet(double x, double y, double velocityX, double velocityY) {
-        super(x, y, velocityX, velocityY);
+    private static final double SPEED = 300.0;
+
+    public InstaDeathBullet(double x, double y, double directionX, double directionY) {
+        super(x, y, directionX, directionY, SPEED);
     }
 
     @Override
