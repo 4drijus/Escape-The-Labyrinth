@@ -1,5 +1,6 @@
 package lt.escape.labyrinth.server.enemy;
 
+import lt.escape.labyrinth.shared.EnemyType;
 import lt.escape.labyrinth.shared.PlayerState;
 
 /**
@@ -17,6 +18,11 @@ public class SpikyBush extends Enemy {
     public SpikyBush(double x, double y, int damageAmount) {
         super(x, y, new StationaryBehavior());
         this.damageAmount = damageAmount;
+    }
+
+    @Override
+    public EnemyType getType() {
+        return EnemyType.SPIKY_BUSH;
     }
 
     public boolean isTouching(PlayerState player) {

@@ -48,9 +48,9 @@ public class GamePanel extends JPanel {
         }
 
         // Bullets
-        Image bulletSprite = Assets.getBulletSprite();
         for (BulletState bullet : state.getBullets()) {
-            g.drawImage(bulletSprite, (int) bullet.getX(), (int) bullet.getY(), this);
+            Image sprite = Assets.getBulletSprite(bullet.getType());
+            g.drawImage(sprite, (int) bullet.getX(), (int) bullet.getY(), this);
         }
 
         // Player 1

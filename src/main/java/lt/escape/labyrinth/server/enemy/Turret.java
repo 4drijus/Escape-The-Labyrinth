@@ -6,28 +6,24 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Concrete enemy. Also stationary by default, but firing logic is
+ * Abstract enemy. Also stationary by default, but firing logic is
  * independent of the Behavior strategy — the strategy only governs
  * movement, so Turret can swap in PatrolBehavior later (e.g. a turret
  * on a rail) without touching fire().
+ * Creator in the Factory Method pattern.
  */
-public class Turret extends Enemy {
+public abstract class Turret extends Enemy {
 
-    private final int damage;
     private final int firingIntervalMs;
-    private final double bulletSpeed;
     private long msSinceLastShot = 0;
 
-    public Turret(double x, double y, int damage, int firingIntervalMs) {
-        this(x, y, damage, firingIntervalMs, 300.0);
+    protected Turret(double x, double y, int firingIntervalMs) {
+        super(x, y, new StationaryBehavior());
+        this.firingIntervalMs = firingIntervalMs;
     }
 
-    public Turret(double x, double y, int damage, int firingIntervalMs, double bulletSpeed) {
-        super(x, y, new StationaryBehavior());
-        this.damage = damage;
-        this.firingIntervalMs = firingIntervalMs;
-        this.bulletSpeed = bulletSpeed;
-    }
+    /** Factory method: each concrete turret decides which Bullet it fires. */
+    protected abstract Bullet createBullet(double x, double y, double directionX, double directionY);
 
     @Override
     public List<Bullet> update(List<PlayerState> players, double deltaTime) {
@@ -52,10 +48,10 @@ public class Turret extends Enemy {
             length = 1; // avoid divide-by-zero if the turret sits on the player
         }
 
-        double velocityX = (dx / length) * bulletSpeed;
-        double velocityY = (dy / length) * bulletSpeed;
+        double directionX = dx / length;
+        double directionY = dy / length;
 
-        return new Bullet(x, y, velocityX, velocityY, damage);
+        return createBullet(x, y, directionX, directionY);
     }
 
     private PlayerState nearestPlayer(List<PlayerState> players) {

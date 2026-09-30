@@ -1,5 +1,6 @@
 package lt.escape.labyrinth.server.enemy;
 
+import lt.escape.labyrinth.shared.BulletType;
 import lt.escape.labyrinth.shared.PlayerState;
 
 /**
@@ -7,27 +8,32 @@ import lt.escape.labyrinth.shared.PlayerState;
  * it doesn't have a Behavior/movement strategy, it isn't drawn from the
  * Enemy hierarchy, and it has its own lifecycle (it dies on impact or
  * once it leaves the level).
+ * Product in the Factory Method pattern.
  */
-public class Bullet {
+public abstract class Bullet {
 
     private double x;
     private double y;
     private final double velocityX;
     private final double velocityY;
-    private final int damage;
 
     /** Simple circle-collision radius, in pixels. Tune to taste. */
     private static final double HIT_RADIUS = 12;
 
     private boolean active = true;
 
-    public Bullet(double x, double y, double velocityX, double velocityY, int damage) {
+    protected Bullet(double x, double y, double directionX, double directionY, double speed) {
         this.x = x;
         this.y = y;
-        this.velocityX = velocityX;
-        this.velocityY = velocityY;
-        this.damage = damage;
+        this.velocityX = directionX * speed;
+        this.velocityY = directionY * speed;
     }
+
+    /** Called by the server when this bullet hits a player. */
+    public abstract void onHit(PlayerState player);
+
+    /** Tells the client which sprite to draw for this bullet. */
+    public abstract BulletType getType();
 
     public void update(double deltaTime) {
         x += velocityX * deltaTime;
@@ -51,10 +57,6 @@ public class Bullet {
 
     public double getY() {
         return y;
-    }
-
-    public int getDamage() {
-        return damage;
     }
 
     public boolean isActive() {

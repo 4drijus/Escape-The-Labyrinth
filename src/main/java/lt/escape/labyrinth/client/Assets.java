@@ -1,5 +1,6 @@
 package lt.escape.labyrinth.client;
 
+import lt.escape.labyrinth.shared.BulletType;
 import lt.escape.labyrinth.shared.EnemyType;
 
 import javax.imageio.ImageIO;
@@ -17,10 +18,10 @@ import java.util.Map;
 public final class Assets {
 
     private static final Map<EnemyType, Image> ENEMY_SPRITES = new EnumMap<>(EnemyType.class);
+    private static final Map<BulletType, Image> BULLET_SPRITES = new EnumMap<>(BulletType.class);
 
     private static Image playerRedSprite;
     private static Image playerBlueSprite;
-    private static Image bulletSprite;
 
     private Assets() {
     }
@@ -29,10 +30,13 @@ public final class Assets {
     public static void load() {
         playerRedSprite = loadImage("/images/player_red.png");
         playerBlueSprite = loadImage("/images/player_blue.png");
-        bulletSprite = loadImage("/images/bullet.png");
+
+        BULLET_SPRITES.put(BulletType.NORMAL, loadImage("/images/bullet.png"));
+        BULLET_SPRITES.put(BulletType.INSTA_DEATH, loadImage("/images/insta_death_bullet.png"));
 
         ENEMY_SPRITES.put(EnemyType.SPIKY_BUSH, loadImage("/images/spiky_bush.png"));
         ENEMY_SPRITES.put(EnemyType.TURRET, loadImage("/images/turret.png"));
+        ENEMY_SPRITES.put(EnemyType.INSTA_DEATH_TURRET, loadImage("/images/insta_death_turret.png"));
     }
 
     private static Image loadImage(String classpathResource) {
@@ -54,8 +58,8 @@ public final class Assets {
         return playerBlueSprite;
     }
 
-    public static Image getBulletSprite() {
-        return bulletSprite;
+    public static Image getBulletSprite(BulletType type) {
+        return BULLET_SPRITES.get(type);
     }
 
     public static Image getEnemySprite(EnemyType type) {
