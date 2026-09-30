@@ -6,28 +6,28 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Concrete enemy. Also stationary by default, but firing logic is
+ * Abstract enemy. Also stationary by default, but firing logic is
  * independent of the Behavior strategy — the strategy only governs
  * movement, so Turret can swap in PatrolBehavior later (e.g. a turret
  * on a rail) without touching fire().
+ * Creator in the Factory Method pattern.
  */
-public class Turret extends Enemy {
+public abstract class Turret extends Enemy {
 
-    private final int damage;
+    protected static final double DEFAULT_BULLET_SPEED = 300.0;
+
     private final int firingIntervalMs;
     private final double bulletSpeed;
     private long msSinceLastShot = 0;
 
-    public Turret(double x, double y, int damage, int firingIntervalMs) {
-        this(x, y, damage, firingIntervalMs, 300.0);
-    }
-
-    public Turret(double x, double y, int damage, int firingIntervalMs, double bulletSpeed) {
+    protected Turret(double x, double y, int firingIntervalMs, double bulletSpeed) {
         super(x, y, new StationaryBehavior());
-        this.damage = damage;
         this.firingIntervalMs = firingIntervalMs;
         this.bulletSpeed = bulletSpeed;
     }
+
+    /** Factory method: each concrete turret decides which Bullet it fires. */
+    protected abstract Bullet createBullet(double x, double y, double velocityX, double velocityY);
 
     @Override
     public List<Bullet> update(List<PlayerState> players, double deltaTime) {
@@ -55,7 +55,7 @@ public class Turret extends Enemy {
         double velocityX = (dx / length) * bulletSpeed;
         double velocityY = (dy / length) * bulletSpeed;
 
-        return new Bullet(x, y, velocityX, velocityY, damage);
+        return createBullet(x, y, velocityX, velocityY);
     }
 
     private PlayerState nearestPlayer(List<PlayerState> players) {

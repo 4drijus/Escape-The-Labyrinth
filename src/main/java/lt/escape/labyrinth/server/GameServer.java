@@ -4,10 +4,10 @@ import lt.escape.labyrinth.shared.GameState;
 import lt.escape.labyrinth.shared.PlayerState;
 import lt.escape.labyrinth.shared.EnemyState;
 import lt.escape.labyrinth.shared.BulletState;
-import lt.escape.labyrinth.shared.EnemyType;
 import lt.escape.labyrinth.server.enemy.Enemy;
 import lt.escape.labyrinth.server.enemy.SpikyBush;
-import lt.escape.labyrinth.server.enemy.Turret;
+import lt.escape.labyrinth.server.enemy.NormalTurret;
+import lt.escape.labyrinth.server.enemy.InstaDeathTurret;
 import lt.escape.labyrinth.server.enemy.Bullet;
 
 import java.io.IOException;
@@ -34,7 +34,8 @@ public class GameServer {
     // TODO: replace this hardcoded placement with real level data once level loading exists
     private static final List<Enemy> enemies = new ArrayList<>(List.of(
             new SpikyBush(300, 480, 1),
-            new Turret(700, 200, 1, 2000)
+            new NormalTurret(700, 200, 1, 2000),
+            new InstaDeathTurret(200, 200, 3000)
     ));
 
     private static final List<Bullet> bullets = new ArrayList<>();
@@ -122,8 +123,7 @@ public class GameServer {
     /** Mirrors the (fixed, hardcoded-for-now) enemies list into gameState's shared EnemyState snapshots, one time, at startup. */
     private static void initEnemyStates() {
         for (Enemy enemy : enemies) {
-            EnemyType type = (enemy instanceof SpikyBush) ? EnemyType.SPIKY_BUSH : EnemyType.TURRET;
-            gameState.getEnemies().add(new EnemyState(type, enemy.getX(), enemy.getY()));
+            gameState.getEnemies().add(new EnemyState(enemy.getType(), enemy.getX(), enemy.getY()));
         }
     }
 
@@ -153,7 +153,7 @@ public class GameServer {
 
             for (PlayerState player : players) {
                 if (bullet.hits(player)) {
-                    player.takeDamage(bullet.getDamage());
+                    bullet.onHit(player);
                     it.remove();
                     break;
                 }
@@ -162,7 +162,7 @@ public class GameServer {
 
         List<BulletState> bulletStates = new ArrayList<>();
         for (Bullet bullet : bullets) {
-            bulletStates.add(new BulletState(bullet.getX(), bullet.getY()));
+            bulletStates.add(new BulletState(bullet.getType(), bullet.getX(), bullet.getY()));
         }
         gameState.setBullets(bulletStates);
     }

@@ -4,6 +4,7 @@ import lt.escape.labyrinth.shared.PlayerCommand;
 import lt.escape.labyrinth.shared.EnemyState;
 import lt.escape.labyrinth.shared.EnemyType;
 import lt.escape.labyrinth.shared.BulletState;
+import lt.escape.labyrinth.shared.BulletType;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -120,9 +121,10 @@ public class NetworkClient {
 
         for (String entry : data.split(";")) {
             String[] fields = entry.split(",");
-            double x = Double.parseDouble(fields[0]);
-            double y = Double.parseDouble(fields[1]);
-            bullets.add(new BulletState(x, y));
+            BulletType type = BulletType.valueOf(fields[0]);
+            double x = Double.parseDouble(fields[1]);
+            double y = Double.parseDouble(fields[2]);
+            bullets.add(new BulletState(type, x, y));
         }
         return bullets;
     }

@@ -120,7 +120,9 @@ public class ClientHandler implements Runnable {
                 message.append(";");
             }
             BulletState bullet = bullets.get(i);
-            message.append(bullet.getX()).append(",").append(bullet.getY());
+            message.append(bullet.getType()).append(",")
+                    .append(bullet.getX()).append(",")
+                    .append(bullet.getY());
         }
 
         output.println(message);

@@ -1,5 +1,6 @@
 package lt.escape.labyrinth.server.enemy;
 
+import lt.escape.labyrinth.shared.EnemyType;
 import lt.escape.labyrinth.shared.PlayerState;
 
 import java.util.Collections;
@@ -38,6 +39,9 @@ public abstract class Enemy {
         }
         return Collections.emptyList();
     }
+
+    /** Tells the client which sprite to draw for this enemy. */
+    public abstract EnemyType getType();
 
     public double getX() {
         return x;
