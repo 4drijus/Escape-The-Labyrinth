@@ -1,4 +1,4 @@
-package lt.escape.labyrinth.interactive;
+package lt.escape.labyrinth.server.interactive;
 
 public final class TimedElementFactory implements InteractiveElementFactory {
     @Override public Door createDoor() { return new TimedDoor(3.0); }

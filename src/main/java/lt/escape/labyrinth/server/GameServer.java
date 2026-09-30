@@ -9,6 +9,11 @@ import lt.escape.labyrinth.server.enemy.Enemy;
 import lt.escape.labyrinth.server.enemy.SpikyBush;
 import lt.escape.labyrinth.server.enemy.Turret;
 import lt.escape.labyrinth.server.enemy.Bullet;
+import lt.escape.labyrinth.server.interactive.Door;
+import lt.escape.labyrinth.server.interactive.Button;
+import lt.escape.labyrinth.server.interactive.PressurePlate;
+import lt.escape.labyrinth.server.interactive.InteractiveElementFactory;
+import lt.escape.labyrinth.server.interactive.NormalElementFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -38,6 +43,10 @@ public class GameServer {
     ));
 
     private static final List<Bullet> bullets = new ArrayList<>();
+    // while we got no levels
+    private static Door door;
+    private static Button button;
+    private static PressurePlate pressurePlate;
 
     public static void main(String[] args) {
         System.out.println("Starting the server");
@@ -46,6 +55,7 @@ public class GameServer {
         System.out.println("Game state created");
 
         initEnemyStates();
+        initInteractiveElements(new NormalElementFactory());//need for now
 
         Thread gameThread = new Thread(GameServer::gameLoop);
 
@@ -84,6 +94,15 @@ public class GameServer {
         }
     }
 
+    // Uses the provided factory to create a door and its linked button and pressure plate.
+    private static void initInteractiveElements(
+            InteractiveElementFactory factory) {
+
+        door = factory.createDoor();
+        button = factory.createButton(door);
+        pressurePlate = factory.createPressurePlate(door);
+    }
+
     private static void gameLoop() {
         final long frameTime = 16_000_000;
 
@@ -115,7 +134,7 @@ public class GameServer {
         updateEnemies(players);
         updateBullets(players);
         checkContactDamage(players);
-
+        door.update(DELTA_TIME_SECONDS);//keeping here for now
         broadcastGameState();
     }
 

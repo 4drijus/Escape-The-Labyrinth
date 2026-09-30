@@ -1,4 +1,4 @@
-package lt.escape.labyrinth.interactive;
+package lt.escape.labyrinth.server.interactive;
 
 public abstract class PressurePlate extends InteractiveElement {
     protected final Door door;

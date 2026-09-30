@@ -1,4 +1,4 @@
-package lt.escape.labyrinth.interactive;
+package lt.escape.labyrinth.server.interactive;
 
 public final class NormalButton extends Button {
     public NormalButton(Door door) { super(door); }

@@ -1,4 +1,4 @@
-package lt.escape.labyrinth.interactive;
+package lt.escape.labyrinth.server.interactive;
 
 public final class AbstractFactoryDemo {
     public static void main(String[] args) {

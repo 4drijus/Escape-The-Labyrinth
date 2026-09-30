@@ -1,4 +1,4 @@
-package lt.escape.labyrinth.interactive;
+package lt.escape.labyrinth.server.interactive;
 
 public final class NormalPressurePlate extends PressurePlate {
     public NormalPressurePlate(Door door) { super(door); }

@@ -1,4 +1,4 @@
-package lt.escape.labyrinth.interactive;
+package lt.escape.labyrinth.server.interactive;
 
 public final class TimedButton extends Button {
     public TimedButton(Door door) { super(door); }
