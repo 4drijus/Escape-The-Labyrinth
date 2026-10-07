@@ -4,8 +4,9 @@ import lt.escape.labyrinth.shared.BulletState;
 import lt.escape.labyrinth.shared.EnemyState;
 
 import java.util.List;
+import java.util.ArrayList;
 
-public class ClientGameState {
+public class ClientGameState implements ISubject {
     private double player1X;
     private double player1Y;
 
@@ -14,6 +15,27 @@ public class ClientGameState {
 
     private List<EnemyState> enemies = List.of();
     private List<BulletState> bullets = List.of();
+
+    private final List<IObserver> observers = new ArrayList<>();
+
+    @Override
+    public synchronized void registerObserver(IObserver observer) {
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+
+    @Override
+    public synchronized void removeObserver(IObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public synchronized void notifyObservers() {
+        for (IObserver observer : observers) {
+            observer.update();
+        }
+    }
 
     public synchronized void update(
             double player1X,
@@ -26,14 +48,20 @@ public class ClientGameState {
 
         this.player2X = player2X;
         this.player2Y = player2Y;
+
+        notifyObservers();
     }
 
     public synchronized void updateEnemies(List<EnemyState> enemies) {
+
         this.enemies = enemies;
+        notifyObservers();
     }
 
     public synchronized void updateBullets(List<BulletState> bullets) {
+
         this.bullets = bullets;
+        notifyObservers();
     }
 
     public synchronized double getPlayer1X() {

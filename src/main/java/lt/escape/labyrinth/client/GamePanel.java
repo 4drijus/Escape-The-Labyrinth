@@ -9,7 +9,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 
-public class GamePanel extends JPanel {
+public class GamePanel extends JPanel implements IObserver {
     private final NetworkClient networkClient;
     private final InputHandler inputHandler;
     private final Timer gameTimer;
@@ -22,10 +22,21 @@ public class GamePanel extends JPanel {
         addKeyListener(inputHandler);
         setFocusable(true);
 
+        // Užregistruojam GamePanel kaip IObserver prie ClientGameState būsenos
+        if (networkClient.getGameState() != null) {
+            networkClient.getGameState().registerObserver(this);
+        }
+
         gameTimer = new Timer(16, e -> updateGame());
         gameTimer.start();
 
         requestFocusInWindow();
+    }
+
+    // IObserver interfeiso metodas: iškviečiamas automatiškai, kai ClientGameState informuoja apie pokyčius
+    @Override
+    public void update() {
+        repaint();
     }
 
     private void updateGame() {
