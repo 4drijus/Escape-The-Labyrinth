@@ -54,6 +54,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
+
     private void handleCommand(PlayerCommand command) {
         PlayerState player = gameState.getPlayer(playerId);
 
