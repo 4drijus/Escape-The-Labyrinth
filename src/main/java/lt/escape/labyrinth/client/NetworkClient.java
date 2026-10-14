@@ -5,6 +5,13 @@ import lt.escape.labyrinth.shared.EnemyState;
 import lt.escape.labyrinth.shared.EnemyType;
 import lt.escape.labyrinth.shared.BulletState;
 import lt.escape.labyrinth.shared.BulletType;
+import lt.escape.labyrinth.shared.WallState;
+import lt.escape.labyrinth.shared.TileState;
+import lt.escape.labyrinth.shared.TileType;
+import lt.escape.labyrinth.shared.DoorState;
+import lt.escape.labyrinth.shared.ButtonState;
+import lt.escape.labyrinth.shared.PressurePlateState;
+import lt.escape.labyrinth.shared.ExitState;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -58,6 +65,8 @@ public class NetworkClient {
             while ((message = input.readLine()) != null) {
                 if (message.startsWith("STATE:")) {
                     processGameState(message);
+                } else if (message.startsWith("LEVEL:")) {
+                processLevelData(message);
                 }
             }
         } catch (IOException e) {
@@ -80,9 +89,122 @@ public class NetworkClient {
             gameState.update(player1X, player1Y, player2X, player2Y);
             gameState.updateEnemies(parseEnemies(sections));
             gameState.updateBullets(parseBullets(sections));
+
+            String doorOpenData = findSection(sections, "DOOR_OPEN:");
+            if (!doorOpenData.isEmpty()) {
+                gameState.updateDoorOpen(Boolean.parseBoolean(doorOpenData));
+            }
         } catch (Exception e) {
             System.out.println("Invalid game state: " + message);
         }
+    }
+
+    /**
+     * Sent once, right after PLAYER_ID -- static level geometry that
+     * never changes after load, so it doesn't need to be re-parsed
+     * every tick the way STATE: is.
+     */
+    private void processLevelData(String message) {
+        try {
+            String[] sections = message.split("\\|");
+
+            List<WallState> walls = parseWalls(sections);
+            List<TileState> tiles = parseTiles(sections);
+            DoorState door = parseDoor(sections);
+            ButtonState button = parseButton(sections);
+            PressurePlateState pressurePlate = parsePressurePlate(sections);
+            ExitState exit = parseExit(sections);
+
+            gameState.updateLevelData(walls, tiles, door, button, pressurePlate, exit);
+        } catch (Exception e) {
+            System.out.println("Invalid level data: " + message);
+        }
+    }
+
+    private List<WallState> parseWalls(String[] sections) {
+        List<WallState> walls = new ArrayList<>();
+        String data = findSection(sections, "WALLS:");
+        if (data.isEmpty()) {
+            return walls;
+        }
+        for (String entry : data.split(";")) {
+            String[] f = entry.split(",");
+            walls.add(new WallState(
+                    Double.parseDouble(f[0]), Double.parseDouble(f[1]),
+                    Double.parseDouble(f[2]), Double.parseDouble(f[3])));
+        }
+        return walls;
+    }
+
+    private List<TileState> parseTiles(String[] sections) {
+        List<TileState> tiles = new ArrayList<>();
+        String data = findSection(sections, "TILES:");
+        if (data.isEmpty()) {
+            return tiles;
+        }
+        for (String entry : data.split(";")) {
+            String[] f = entry.split(",");
+            TileType type = TileType.valueOf(f[0]);
+            tiles.add(new TileState(type,
+                    Double.parseDouble(f[1]), Double.parseDouble(f[2]),
+                    Double.parseDouble(f[3]), Double.parseDouble(f[4])));
+        }
+        return tiles;
+    }
+
+    private DoorState parseDoor(String[] sections) {
+        String data = findSection(sections, "DOOR:");
+        if (data.isEmpty()) {
+            return null;
+        }
+        String[] f = data.split(",");
+        // Starts closed; the per-tick DOOR_OPEN field updates this afterward.
+        return new DoorState(
+                Double.parseDouble(f[0]), Double.parseDouble(f[1]),
+                Double.parseDouble(f[2]), Double.parseDouble(f[3]), false);
+    }
+
+    private ButtonState parseButton(String[] sections) {
+        String data = findSection(sections, "BUTTON:");
+        if (data.isEmpty()) {
+            return null;
+        }
+        String[] f = data.split(",");
+        return new ButtonState(
+                Double.parseDouble(f[0]), Double.parseDouble(f[1]),
+                Double.parseDouble(f[2]), Double.parseDouble(f[3]));
+    }
+
+    private PressurePlateState parsePressurePlate(String[] sections) {
+        String data = findSection(sections, "PRESSUREPLATE:");
+        if (data.isEmpty()) {
+            return null;
+        }
+        String[] f = data.split(",");
+        return new PressurePlateState(
+                Double.parseDouble(f[0]), Double.parseDouble(f[1]),
+                Double.parseDouble(f[2]), Double.parseDouble(f[3]));
+    }
+
+    private ExitState parseExit(String[] sections) {
+        String data = findSection(sections, "EXIT:");
+        if (data.isEmpty()) {
+            return null;
+        }
+        String[] f = data.split(",");
+        return new ExitState(
+                Double.parseDouble(f[0]), Double.parseDouble(f[1]),
+                Double.parseDouble(f[2]), Double.parseDouble(f[3]));
+    }
+
+    /** Finds a "|"-delimited section by its prefix, instead of relying on a fixed index. */
+    private String findSection(String[] sections, String prefix) {
+        for (String section : sections) {
+            if (section.startsWith(prefix)) {
+                return section.substring(prefix.length());
+            }
+        }
+        return "";
     }
 
     private List<EnemyState> parseEnemies(String[] sections) {

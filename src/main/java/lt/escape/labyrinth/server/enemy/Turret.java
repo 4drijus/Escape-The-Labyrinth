@@ -1,5 +1,6 @@
 package lt.escape.labyrinth.server.enemy;
 
+import lt.escape.labyrinth.server.world.Wall;
 import lt.escape.labyrinth.shared.PlayerState;
 
 import java.util.Collections;
@@ -26,8 +27,8 @@ public abstract class Turret extends Enemy {
     protected abstract Bullet createBullet(double x, double y, double directionX, double directionY);
 
     @Override
-    public List<Bullet> update(List<PlayerState> players, double deltaTime) {
-        super.update(players, deltaTime); // still lets the Behavior run
+    public List<Bullet> update(List<PlayerState> players, List<Wall> walls, double deltaTime) {
+        super.update(players, walls, deltaTime); // still lets the Behavior run
 
         msSinceLastShot += (long) (deltaTime * 1000);
         if (msSinceLastShot < firingIntervalMs || players.isEmpty()) {

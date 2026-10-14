@@ -1,7 +1,13 @@
 package lt.escape.labyrinth.client;
 
 import lt.escape.labyrinth.shared.BulletState;
+import lt.escape.labyrinth.shared.ButtonState;
+import lt.escape.labyrinth.shared.DoorState;
 import lt.escape.labyrinth.shared.EnemyState;
+import lt.escape.labyrinth.shared.ExitState;
+import lt.escape.labyrinth.shared.PressurePlateState;
+import lt.escape.labyrinth.shared.TileState;
+import lt.escape.labyrinth.shared.WallState;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -48,9 +54,51 @@ public class GamePanel extends JPanel implements IObserver {
         super.paintComponent(g);
         ClientGameState state = networkClient.getGameState();
 
-        // Ground
-        g.setColor(Color.GREEN);
-        g.fillRect(0, 520, getWidth(), 80);
+        // Walls -- drawn first, as solid blocking geometry.
+        g.setColor(new Color(88, 53, 8));
+        for (WallState wall : state.getWalls()) {
+            g.fillRect((int) wall.getX(), (int) wall.getY(), (int) wall.getWidth(), (int) wall.getHeight());
+        }
+
+        // Tiles -- puddles and bushes, colored by type until real sprites exist.
+        for (TileState tile : state.getTiles()) {
+            g.setColor(colorFor(tile));
+            g.fillRect((int) tile.getX(), (int) tile.getY(), (int) tile.getWidth(), (int) tile.getHeight());
+        }
+
+        // Pressure plate -- thin strip, only drawn if this level has one.
+        PressurePlateState plate = state.getPressurePlate();
+        if (plate != null) {
+            g.setColor(new Color(170, 170, 170));
+            g.fillRect((int) plate.getX(), (int) plate.getY(), (int) plate.getWidth(), (int) plate.getHeight());
+        }
+
+        // Button
+        ButtonState button = state.getButton();
+        if (button != null) {
+            g.setColor(new Color(255, 236, 1));
+            g.fillRect((int) button.getX(), (int) button.getY(), (int) button.getWidth(), (int) button.getHeight());
+        }
+
+        // Door -- solid while closed; outline-only once open, since the
+        // player can walk through it at that point.
+        DoorState door = state.getDoor();
+        if (door != null) {
+            if (door.isOpen()) {
+                g.setColor(new Color(255, 255, 255));
+                g.drawRect((int) door.getX(), (int) door.getY(), (int) door.getWidth(), (int) door.getHeight());
+            } else {
+                g.setColor(new Color(0, 0, 0));
+                g.fillRect((int) door.getX(), (int) door.getY(), (int) door.getWidth(), (int) door.getHeight());
+            }
+        }
+
+        // Exit zone -- outlined only, so players standing in it stay visible.
+        ExitState exit = state.getExit();
+        if (exit != null) {
+            g.setColor(new Color(26, 155, 127));
+            g.drawRect((int) exit.getX(), (int) exit.getY(), (int) exit.getWidth(), (int) exit.getHeight());
+        }
 
         // Enemies
         for (EnemyState enemy : state.getEnemies()) {
@@ -69,5 +117,20 @@ public class GamePanel extends JPanel implements IObserver {
 
         // Player 2
         g.drawImage(Assets.getPlayerRedSprite(), (int) state.getPlayer2X(), (int) state.getPlayer2Y(), this);
+    }
+
+    private Color colorFor(TileState tile) {
+        switch (tile.getType()) {
+            case BLUE_PUDDLE:
+                return new Color(60, 120, 220, 180);
+            case RED_PUDDLE:
+                return new Color(220, 80, 60, 180);
+            case BLACK_PUDDLE:
+                return new Color(46, 45, 45, 200);
+            case BUSH:
+                return new Color(40, 120, 40);
+            default:
+                return new Color(71, 8, 88); // obviously-wrong color if a TileType is ever missed here
+        }
     }
 }

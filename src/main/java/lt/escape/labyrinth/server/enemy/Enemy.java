@@ -1,5 +1,6 @@
 package lt.escape.labyrinth.server.enemy;
 
+import lt.escape.labyrinth.server.world.Wall;
 import lt.escape.labyrinth.shared.EnemyType;
 import lt.escape.labyrinth.shared.PlayerState;
 
@@ -8,8 +9,11 @@ import java.util.List;
 
 /**
  * Context class in the Strategy pattern. Holds a Behavior and delegates
- * movement decisions to it every tick, instead of hard-coding movement
- * logic in each Enemy subclass.
+ * movement decisions to it every tick.
+ *
+ * update() now also takes the level's walls and passes them straight
+ * through to the Behavior -- Enemy itself doesn't do any wall logic,
+ * it just plumbs the data through to whichever strategy needs it.
  */
 public abstract class Enemy {
 
@@ -23,36 +27,40 @@ public abstract class Enemy {
         this.behavior = behavior;
     }
 
-    /**
-     * Lets an enemy change strategy at runtime, e.g. patrol until it
-     * spots a player, then switch to StationaryBehavior (or a future
-     * ChaseBehavior) to attack.
-     */
     public void setBehavior(Behavior behavior) {
         this.behavior = behavior;
     }
 
-    /** Called once per game tick by GameServer's update loop. */
-    public List<Bullet> update(List<PlayerState> players, double deltaTime) {
+    /**
+     * This was missing entirely -- GameServer.initEnemyStates() calls
+     * enemy.getType() through a List<Enemy>, so the base class needs to
+     * declare it even though every concrete subclass (SpikyBush,
+     * NormalTurret, InstaDeathTurret) already implements it.
+     */
+    public abstract EnemyType getType();
+
+    /**
+     * Called once per game tick by GameServer's update loop.
+     * Returns any bullets this enemy spawned this tick (empty for
+     * enemies, like SpikyBush, that don't shoot).
+     */
+    public List<Bullet> update(List<PlayerState> players, List<Wall> walls, double deltaTime) {
         if (behavior != null) {
-            behavior.move(this, players, deltaTime);
+            behavior.move(this, players, walls, deltaTime);
         }
         return Collections.emptyList();
     }
-
-    /** Tells the client which sprite to draw for this enemy. */
-    public abstract EnemyType getType();
 
     public double getX() {
         return x;
     }
 
-    public double getY() {
-        return y;
-    }
-
     public void setX(double x) {
         this.x = x;
+    }
+
+    public double getY() {
+        return y;
     }
 
     public void setY(double y) {

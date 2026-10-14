@@ -5,6 +5,12 @@ import lt.escape.labyrinth.shared.PlayerCommand;
 import lt.escape.labyrinth.shared.PlayerState;
 import lt.escape.labyrinth.shared.EnemyState;
 import lt.escape.labyrinth.shared.BulletState;
+import lt.escape.labyrinth.shared.WallState;
+import lt.escape.labyrinth.shared.TileState;
+import lt.escape.labyrinth.shared.DoorState;
+import lt.escape.labyrinth.shared.ButtonState;
+import lt.escape.labyrinth.shared.PressurePlateState;
+import lt.escape.labyrinth.shared.ExitState;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -34,6 +40,7 @@ public class ClientHandler implements Runnable {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             output.println("PLAYER_ID:" + playerId);
+            sendLevelData();
 
             System.out.println("Player " + playerId + " handler started");
 
@@ -86,6 +93,86 @@ public class ClientHandler implements Runnable {
         System.out.println("Player " + playerId + " velocityX = " + player.getVelocityX());
     }
 
+    /**
+     * Sent once, right after PLAYER_ID, instead of every tick like
+     * sendGameState() -- walls/tiles/door/button/pressure plate/exit
+     * never move, so there's no reason to resend their positions 60
+     * times a second. This is what was missing entirely before: these
+     * fields existed on GameState but nothing ever put them on the wire.
+     */
+    private void sendLevelData() {
+        if (output == null) {
+            return;
+        }
+
+        StringBuilder message = new StringBuilder("LEVEL:");
+
+        message.append("|WALLS:");
+        List<WallState> walls = gameState.getWalls();
+        for (int i = 0; i < walls.size(); i++) {
+            if (i > 0) {
+                message.append(";");
+            }
+            WallState wall = walls.get(i);
+            message.append(wall.getX()).append(",")
+                    .append(wall.getY()).append(",")
+                    .append(wall.getWidth()).append(",")
+                    .append(wall.getHeight());
+        }
+
+        message.append("|TILES:");
+        List<TileState> tiles = gameState.getTiles();
+        for (int i = 0; i < tiles.size(); i++) {
+            if (i > 0) {
+                message.append(";");
+            }
+            TileState tile = tiles.get(i);
+            message.append(tile.getType()).append(",")
+                    .append(tile.getX()).append(",")
+                    .append(tile.getY()).append(",")
+                    .append(tile.getWidth()).append(",")
+                    .append(tile.getHeight());
+        }
+
+        message.append("|DOOR:");
+        DoorState door = gameState.getDoor();
+        if (door != null) {
+            message.append(door.getX()).append(",")
+                    .append(door.getY()).append(",")
+                    .append(door.getWidth()).append(",")
+                    .append(door.getHeight());
+        }
+
+        message.append("|BUTTON:");
+        ButtonState button = gameState.getButton();
+        if (button != null) {
+            message.append(button.getX()).append(",")
+                    .append(button.getY()).append(",")
+                    .append(button.getWidth()).append(",")
+                    .append(button.getHeight());
+        }
+
+        message.append("|PRESSUREPLATE:");
+        PressurePlateState plate = gameState.getPressurePlate();
+        if (plate != null) {
+            message.append(plate.getX()).append(",")
+                    .append(plate.getY()).append(",")
+                    .append(plate.getWidth()).append(",")
+                    .append(plate.getHeight());
+        }
+
+        message.append("|EXIT:");
+        ExitState exit = gameState.getExit();
+        if (exit != null) {
+            message.append(exit.getX()).append(",")
+                    .append(exit.getY()).append(",")
+                    .append(exit.getWidth()).append(",")
+                    .append(exit.getHeight());
+        }
+
+        output.println(message);
+    }
+
     public void sendGameState() {
         if (output == null) {
             return;
@@ -125,6 +212,10 @@ public class ClientHandler implements Runnable {
                     .append(bullet.getX()).append(",")
                     .append(bullet.getY());
         }
+
+        message.append("|DOOR_OPEN:");
+        DoorState door = gameState.getDoor();
+        message.append(door != null && door.isOpen());
 
         output.println(message);
     }
