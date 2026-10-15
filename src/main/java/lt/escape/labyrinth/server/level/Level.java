@@ -12,6 +12,7 @@ import lt.escape.labyrinth.server.world.Potion;
 import lt.escape.labyrinth.server.world.Sign;
 import lt.escape.labyrinth.server.world.Tile;
 import lt.escape.labyrinth.server.world.Wall;
+import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.List;
 
@@ -24,8 +25,12 @@ import java.util.List;
  * from the real Door.java/InteractiveElement.java -- neither has x/y),
  * so Level tracks a Rect alongside each one instead of modifying those
  * classes.
+ *
+ * Also a Prototype (see copy()) -- copies are built through LevelBuilder
+ * as well, so the package-private constructor is still only called by
+ * LevelBuilder.build().
  */
-public class Level {
+public class Level implements Prototype<Level> {
 
     /** Simple position+size bundle, since Door/Button/PressurePlate don't carry their own. */
     public static final class Rect {
@@ -99,6 +104,73 @@ public class Level {
         this.boxes = boxes;
         this.potions = potions;
         this.signs = signs;
+    }
+
+    /**
+     * Prototype: an independent copy of this level, so GameServer can keep
+     * one level LevelDirector built as an untouched template and restart
+     * from a copy of it instead of running the recipe again.
+     *
+     * The copy is still assembled by LevelBuilder: Builder stays the only
+     * way a Level gets constructed, and build()'s checks apply to copies
+     * too. Prototype only decides what goes into the builder:
+     * - enemies, the door, exit, lifts, boxes and potions change during
+     *   play, so each one is copied (deep copy);
+     * - button, pressure plate and lever get re-linked to the copied door
+     *   with copyFor() -- otherwise pressing them in the copy would open
+     *   this level's door. A level has a single door, so they all use it;
+     * - walls, tiles and signs never change after build(), so both
+     *   levels share the same objects (shallow on purpose).
+     */
+    @Override
+    public Level copy() {
+        Door doorCopy = door.copy();
+
+        ILevelBuilder builder = new LevelBuilder()
+                .withDimensions(width, height)
+                .withPlayerStarts(player1StartX, player1StartY, player2StartX, player2StartY)
+                .withDoor(doorCopy, doorRect.x, doorRect.y, doorRect.width, doorRect.height);
+
+        if (button != null) {
+            builder.withButton(button.copyFor(doorCopy),
+                    buttonRect.x, buttonRect.y, buttonRect.width, buttonRect.height);
+        }
+        if (pressurePlate != null) {
+            builder.withPressurePlate(pressurePlate.copyFor(doorCopy),
+                    pressurePlateRect.x, pressurePlateRect.y, pressurePlateRect.width, pressurePlateRect.height);
+        }
+        if (lever != null) {
+            builder.withLever(lever.copyFor(doorCopy));
+        }
+        if (exit != null) {
+            builder.withExit(exit.copy());
+        }
+
+        // addEnemy(enemy) keeps the copied enemy's own (copied) Behavior.
+        for (Enemy enemy : enemies) {
+            builder.addEnemy(enemy.copy());
+        }
+        for (Lift lift : lifts) {
+            builder.addLift(lift.copy());
+        }
+        for (Box box : boxes) {
+            builder.addBox(box.copy());
+        }
+        for (Potion potion : potions) {
+            builder.addPotion(potion.copy());
+        }
+
+        for (Wall wall : walls) {
+            builder.addWall(wall);
+        }
+        for (Tile tile : tiles) {
+            builder.addTile(tile);
+        }
+        for (Sign sign : signs) {
+            builder.addSign(sign);
+        }
+
+        return builder.build();
     }
 
     public double getWidth() {

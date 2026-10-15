@@ -1,5 +1,7 @@
 package lt.escape.labyrinth.server.world;
 
+import lt.escape.labyrinth.shared.Prototype;
+
 /**
  * "Dėžė – Galima stumdyti ar sugriauti, siekiant nueiti į nepasiekiamą
  * vietą." Pushable horizontally, or destroyed outright. Also usable to
@@ -15,13 +17,21 @@ package lt.escape.labyrinth.server.world;
  * GameServer's per-tick player/box collision check, which doesn't exist
  * yet. This class is the piece that moves once told to.
  */
-public class Box extends GameObject implements MoveableObj {
+public class Box extends GameObject implements MoveableObj, Prototype<Box> {
     private boolean movable = true;
     private boolean destroyed = false;
     private static final double PUSH_SPEED = 30; // pixels per push call; tune to taste
 
     public Box(double positionX, double positionY, double width, double height) {
         super(positionX, positionY, width, height);
+    }
+
+    @Override
+    public Box copy() {
+        Box copy = new Box(positionX, positionY, width, height);
+        copy.movable = movable;
+        copy.destroyed = destroyed;
+        return copy;
     }
 
     public boolean isMovable() {

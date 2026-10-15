@@ -82,4 +82,14 @@ public class PlayerState {
         return health > 0;
     }
 
+    /** Back to full health, standing still at (x, y) -- used when a level (re)starts. */
+    public void respawn(double x, double y) {
+        this.x = x;
+        this.y = y;
+        this.velocityX = 0;
+        this.velocityY = 0;
+        this.onGround = true;
+        this.health = STARTING_HEALTH;
+    }
+
 }

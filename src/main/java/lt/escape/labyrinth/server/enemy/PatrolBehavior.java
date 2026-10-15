@@ -55,6 +55,19 @@ public class PatrolBehavior implements Behavior {
         enemy.setX(newX);
     }
 
+    /**
+     * Deep copy: startX/initialized/movingRight change every tick, so two
+     * enemies sharing one PatrolBehavior would flip each other's direction.
+     */
+    @Override
+    public Behavior copy() {
+        PatrolBehavior copy = new PatrolBehavior(range, speed);
+        copy.startX = startX;
+        copy.initialized = initialized;
+        copy.movingRight = movingRight;
+        return copy;
+    }
+
     private boolean hitsWall(double x, double y, List<Wall> walls) {
         if (walls == null) {
             return false;

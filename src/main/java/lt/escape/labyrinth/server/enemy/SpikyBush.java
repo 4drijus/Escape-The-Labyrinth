@@ -20,6 +20,16 @@ public class SpikyBush extends Enemy {
         this.damageAmount = damageAmount;
     }
 
+    private SpikyBush(SpikyBush source) {
+        super(source);
+        this.damageAmount = source.damageAmount;
+    }
+
+    @Override
+    public SpikyBush copy() {
+        return new SpikyBush(this);
+    }
+
     @Override
     public EnemyType getType() {
         return EnemyType.SPIKY_BUSH;
