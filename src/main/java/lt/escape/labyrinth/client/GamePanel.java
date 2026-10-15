@@ -1,5 +1,17 @@
 package lt.escape.labyrinth.client;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Image;
+
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+import lt.escape.labyrinth.client.effects.BasicPlayerRenderer;
+import lt.escape.labyrinth.client.effects.JumpEffect;
+import lt.escape.labyrinth.client.effects.PlayerRenderer;
+import lt.escape.labyrinth.client.effects.RunEffect;
+import lt.escape.labyrinth.client.effects.TrailEffect;
 import lt.escape.labyrinth.shared.BulletState;
 import lt.escape.labyrinth.shared.ButtonState;
 import lt.escape.labyrinth.shared.DoorState;
@@ -9,16 +21,31 @@ import lt.escape.labyrinth.shared.PressurePlateState;
 import lt.escape.labyrinth.shared.TileState;
 import lt.escape.labyrinth.shared.WallState;
 
-import javax.swing.JPanel;
-import javax.swing.Timer;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Image;
-
 public class GamePanel extends JPanel implements IObserver {
+
     private final NetworkClient networkClient;
     private final InputHandler inputHandler;
     private final Timer gameTimer;
+    
+// Three decoration layers around the basic renderer.
+    private final PlayerRenderer playerRenderer
+            = new TrailEffect(
+                    new JumpEffect(
+                            new RunEffect(
+                                    new BasicPlayerRenderer()
+                            )
+                    )
+            );
+
+// Movement tracking for the two players.
+    private final double[] previousX = new double[2];
+    private final double[] previousY = new double[2];
+    private final boolean[] positionKnown = new boolean[2];
+
+    private final long[] lastHorizontalMove = new long[2];
+    private final long[] lastVerticalMove = new long[2];
+
+    private static final long EFFECT_HOLD_NANOS = 150_000_000L;
 
     public GamePanel(NetworkClient networkClient) {
         this.networkClient = networkClient;
@@ -113,10 +140,46 @@ public class GamePanel extends JPanel implements IObserver {
         }
 
         // Player 1
-        g.drawImage(Assets.getPlayerBlueSprite(), (int) state.getPlayer1X(), (int) state.getPlayer1Y(), this);
+        drawPlayer(
+                g, 0, Assets.getPlayerBlueSprite(),
+                state.getPlayer1X(), state.getPlayer1Y()
+        );
 
         // Player 2
-        g.drawImage(Assets.getPlayerRedSprite(), (int) state.getPlayer2X(), (int) state.getPlayer2Y(), this);
+        drawPlayer(
+                g, 1, Assets.getPlayerRedSprite(),
+                state.getPlayer2X(), state.getPlayer2Y()
+        );
+    }
+
+    private void drawPlayer(
+            Graphics g, int index, Image sprite, double x, double y
+    ) {
+        long now = System.nanoTime();
+
+        if (positionKnown[index]) {
+            if (Math.abs(x - previousX[index]) > 0.1) {
+                lastHorizontalMove[index] = now;
+            }
+
+            if (Math.abs(y - previousY[index]) > 0.1) {
+                lastVerticalMove[index] = now;
+            }
+        }
+
+        previousX[index] = x;
+        previousY[index] = y;
+        positionKnown[index] = true;
+
+        boolean moving = lastHorizontalMove[index] != 0
+                && now - lastHorizontalMove[index] < EFFECT_HOLD_NANOS;
+
+        boolean jumping = lastVerticalMove[index] != 0
+                && now - lastVerticalMove[index] < EFFECT_HOLD_NANOS;
+
+        playerRenderer.draw(
+                g, sprite, (int) x, (int) y, moving, jumping
+        );
     }
 
     private Color colorFor(TileState tile) {
@@ -133,4 +196,5 @@ public class GamePanel extends JPanel implements IObserver {
                 return new Color(71, 8, 88); // obviously-wrong color if a TileType is ever missed here
         }
     }
+
 }
