@@ -10,9 +10,8 @@ import lt.escape.labyrinth.shared.TileState;
 import lt.escape.labyrinth.shared.WallState;
 
 import java.util.List;
-import java.util.ArrayList;
 
-public class ClientGameState implements ISubject {
+public class ClientGameState extends ISubject {
     private double player1X;
     private double player1Y;
 
@@ -29,27 +28,6 @@ public class ClientGameState implements ISubject {
     private ButtonState button;
     private PressurePlateState pressurePlate;
     private ExitState exit;
-
-    private final List<IObserver> observers = new ArrayList<>();
-
-    @Override
-    public synchronized void registerObserver(IObserver observer) {
-        if (!observers.contains(observer)) {
-            observers.add(observer);
-        }
-    }
-
-    @Override
-    public synchronized void removeObserver(IObserver observer) {
-        observers.remove(observer);
-    }
-
-    @Override
-    public synchronized void notifyObservers() {
-        for (IObserver observer : observers) {
-            observer.update();
-        }
-    }
 
     public synchronized void update(
             double player1X,
