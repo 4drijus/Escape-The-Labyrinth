@@ -3,6 +3,7 @@ package lt.escape.labyrinth.server.enemy;
 import lt.escape.labyrinth.server.world.Wall;
 import lt.escape.labyrinth.shared.EnemyType;
 import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,8 +15,10 @@ import java.util.List;
  * update() now also takes the level's walls and passes them straight
  * through to the Behavior -- Enemy itself doesn't do any wall logic,
  * it just plumbs the data through to whichever strategy needs it.
+ *
+ * Each concrete enemy implements copy()
  */
-public abstract class Enemy {
+public abstract class Enemy implements Prototype<Enemy> {
 
     protected double x;
     protected double y;
@@ -25,6 +28,13 @@ public abstract class Enemy {
         this.x = x;
         this.y = y;
         this.behavior = behavior;
+    }
+
+    /** Copy constructor for copy(). The Behavior is copied too, not shared. */
+    protected Enemy(Enemy source) {
+        this.x = source.x;
+        this.y = source.y;
+        this.behavior = source.behavior == null ? null : source.behavior.copy();
     }
 
     public void setBehavior(Behavior behavior) {

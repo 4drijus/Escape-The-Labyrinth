@@ -11,6 +11,16 @@ public class NormalTurret extends Turret {
         this.damage = damage;
     }
 
+    private NormalTurret(NormalTurret source) {
+        super(source);
+        this.damage = source.damage;
+    }
+
+    @Override
+    public NormalTurret copy() {
+        return new NormalTurret(this);
+    }
+
     @Override
     protected Bullet createBullet(double x, double y, double directionX, double directionY) {
         return new NormalBullet(x, y, directionX, directionY, damage);

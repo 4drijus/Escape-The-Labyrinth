@@ -23,6 +23,12 @@ public abstract class Turret extends Enemy {
         this.firingIntervalMs = firingIntervalMs;
     }
 
+    protected Turret(Turret source) {
+        super(source);
+        this.firingIntervalMs = source.firingIntervalMs;
+        this.msSinceLastShot = source.msSinceLastShot; // so we can have 0 at game restart
+    }
+
     /** Factory method: each concrete turret decides which Bullet it fires. */
     protected abstract Bullet createBullet(double x, double y, double directionX, double directionY);
 

@@ -70,16 +70,21 @@ public class GameServer {
     private static List<Box> boxes = new ArrayList<>();
     private static List<Potion> potions = new ArrayList<>();
 
+    // Prototype: the Level LevelDirector built, kept untouched. The game
+    // always plays a copy of it, so restartLevel() can take a fresh one.
+    private static Level levelTemplate;
+
     public static void main(String[] args) {
         System.out.println("Starting the server");
 
         gameState = GameState.getInstance();
         System.out.println("Game state created");
 
-        //loadLevel(LevelDirector.buildLevelOne(new NormalElementFactory()));
-        //loadLevel(LevelDirector.buildLevelTwo(new NormalElementFactory()));
-        //loadLevel(LevelDirector.buildLevelThree(new NormalElementFactory()));
-        loadLevel(LevelDirector.buildLevelFour(new NormalElementFactory()));   //TODO pasiziuret kaip pakeist lygiu ir pan.
+        //levelTemplate = LevelDirector.buildLevelOne(new NormalElementFactory());
+        //levelTemplate = LevelDirector.buildLevelTwo(new NormalElementFactory());
+        //levelTemplate = LevelDirector.buildLevelThree(new NormalElementFactory());
+        levelTemplate = LevelDirector.buildLevelFour(new NormalElementFactory());   //TODO pasiziuret kaip pakeist lygiu ir pan.
+        loadLevel(levelTemplate.copy());
 
         Thread gameThread = new Thread(GameServer::gameLoop);
 
@@ -121,6 +126,11 @@ public class GameServer {
     private static void loadLevel(Level level) {
         levelWidth = level.getWidth();
         levelHeight = level.getHeight();
+
+        enemies.clear();
+        bullets.clear();
+        gameState.getEnemies().clear();
+        gameState.setBullets(new ArrayList<>());
 
         enemies.addAll(level.getEnemies());
         door = level.getDoor();
@@ -169,14 +179,17 @@ public class GameServer {
         }
 
         PlayerState player1 = gameState.getPlayer1();
-        player1.setX(level.getPlayer1StartX());
-        player1.setY(level.getPlayer1StartY());
+        player1.respawn(level.getPlayer1StartX(), level.getPlayer1StartY());
 
         PlayerState player2 = gameState.getPlayer2();
-        player2.setX(level.getPlayer2StartX());
-        player2.setY(level.getPlayer2StartY());
+        player2.respawn(level.getPlayer2StartX(), level.getPlayer2StartY());
 
         initEnemyStates();
+    }
+
+    private static void restartLevel() {
+        System.out.println("A player died -- restarting the level");
+        loadLevel(levelTemplate.copy());
     }
 
     private static TileType tileTypeOf(Tile tile) {
@@ -233,6 +246,9 @@ public class GameServer {
         door.update(DELTA_TIME_SECONDS);//keeping here for now
         if (gameState.getDoor() != null) {
             gameState.getDoor().setOpen(door.isOpen());
+        }
+        if (!player1.isAlive() || !player2.isAlive()) {
+            restartLevel();
         }
         broadcastGameState();
     }

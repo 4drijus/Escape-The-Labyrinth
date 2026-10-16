@@ -55,6 +55,15 @@ public class PatrolBehavior implements Behavior {
         enemy.setX(newX);
     }
 
+    @Override
+    public Behavior copy() {
+        PatrolBehavior copy = new PatrolBehavior(range, speed);
+        copy.startX = startX;
+        copy.initialized = initialized;
+        copy.movingRight = movingRight;
+        return copy;
+    }
+
     private boolean hitsWall(double x, double y, List<Wall> walls) {
         if (walls == null) {
             return false;

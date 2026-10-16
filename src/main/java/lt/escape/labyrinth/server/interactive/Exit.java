@@ -1,6 +1,7 @@
 package lt.escape.labyrinth.server.interactive;
 
 import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  * žaidėjas ją pasiekęs žaidimo pabaigti negalės." Both players must be
  * standing inside the exit zone at the same time before the level ends.
  */
-public class Exit extends InteractiveElement {
+public class Exit extends InteractiveElement implements Prototype<Exit> {
     private final double positionX;
     private final double positionY;
     private final double width;
@@ -22,6 +23,13 @@ public class Exit extends InteractiveElement {
         this.positionY = positionY;
         this.width = width;
         this.height = height;
+    }
+
+    @Override
+    public Exit copy() {
+        Exit copy = new Exit(positionX, positionY, width, height);
+        copy.gameEnded = gameEnded;
+        return copy;
     }
 
     public double getPositionX() {
