@@ -15,8 +15,7 @@ import java.util.List;
  * fixed range. StationaryBehavior ignores it (it never moves anyway).
  * A future chase-style Behavior would use it the same way.
  *
- * Also a Prototype: Enemy.copy() copies its Behavior so a copied enemy
- * never shares movement state with the original.
+ * Enemy.copy() copies its Behavior
  */
 public interface Behavior extends Prototype<Behavior> {
     void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime);

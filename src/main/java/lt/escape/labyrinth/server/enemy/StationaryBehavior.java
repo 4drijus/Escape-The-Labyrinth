@@ -12,10 +12,6 @@ public class StationaryBehavior implements Behavior {
         // Intentionally does nothing.
     }
 
-    /**
-     * Shallow on purpose: this class has no fields, so there is nothing a
-     * copy could get out of sync with -- every enemy can share one instance.
-     */
     @Override
     public Behavior copy() {
         return this;

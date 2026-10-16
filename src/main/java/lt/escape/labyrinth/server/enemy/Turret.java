@@ -23,11 +23,10 @@ public abstract class Turret extends Enemy {
         this.firingIntervalMs = firingIntervalMs;
     }
 
-    /** Copy constructor for the subclasses' copy() -- keeps the firing cooldown too. */
     protected Turret(Turret source) {
         super(source);
         this.firingIntervalMs = source.firingIntervalMs;
-        this.msSinceLastShot = source.msSinceLastShot;
+        this.msSinceLastShot = source.msSinceLastShot; // so we can have 0 at game restart
     }
 
     /** Factory method: each concrete turret decides which Bullet it fires. */

@@ -127,8 +127,6 @@ public class GameServer {
         levelWidth = level.getWidth();
         levelHeight = level.getHeight();
 
-        // Drop what the previous copy of the level left behind, so
-        // loadLevel() can run again from restartLevel().
         enemies.clear();
         bullets.clear();
         gameState.getEnemies().clear();
@@ -189,11 +187,6 @@ public class GameServer {
         initEnemyStates();
     }
 
-    /**
-     * Prototype in use: a fresh copy of the untouched template instead of
-     * running LevelDirector again. Called from updateGame(), on the game
-     * loop thread, so nothing is iterating the lists loadLevel() clears.
-     */
     private static void restartLevel() {
         System.out.println("A player died -- restarting the level");
         loadLevel(levelTemplate.copy());

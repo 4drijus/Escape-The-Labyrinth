@@ -16,8 +16,7 @@ import java.util.List;
  * through to the Behavior -- Enemy itself doesn't do any wall logic,
  * it just plumbs the data through to whichever strategy needs it.
  *
- * Also a Prototype: each concrete enemy implements copy() through a copy
- * constructor that ends up in Enemy(Enemy) below.
+ * Each concrete enemy implements copy()
  */
 public abstract class Enemy implements Prototype<Enemy> {
 

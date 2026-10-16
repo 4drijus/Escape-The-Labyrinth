@@ -25,10 +25,6 @@ import java.util.List;
  * from the real Door.java/InteractiveElement.java -- neither has x/y),
  * so Level tracks a Rect alongside each one instead of modifying those
  * classes.
- *
- * Also a Prototype (see copy()) -- copies are built through LevelBuilder
- * as well, so the package-private constructor is still only called by
- * LevelBuilder.build().
  */
 public class Level implements Prototype<Level> {
 
@@ -110,17 +106,6 @@ public class Level implements Prototype<Level> {
      * Prototype: an independent copy of this level, so GameServer can keep
      * one level LevelDirector built as an untouched template and restart
      * from a copy of it instead of running the recipe again.
-     *
-     * The copy is still assembled by LevelBuilder: Builder stays the only
-     * way a Level gets constructed, and build()'s checks apply to copies
-     * too. Prototype only decides what goes into the builder:
-     * - enemies, the door, exit, lifts, boxes and potions change during
-     *   play, so each one is copied (deep copy);
-     * - button, pressure plate and lever get re-linked to the copied door
-     *   with copyFor() -- otherwise pressing them in the copy would open
-     *   this level's door. A level has a single door, so they all use it;
-     * - walls, tiles and signs never change after build(), so both
-     *   levels share the same objects (shallow on purpose).
      */
     @Override
     public Level copy() {
