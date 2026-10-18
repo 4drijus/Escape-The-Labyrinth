@@ -2,6 +2,7 @@ package lt.escape.labyrinth.server.enemy;
 
 import lt.escape.labyrinth.shared.BulletType;
 import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Prototype;
 
 /**
  * A projectile fired by a Turret. Deliberately NOT an Enemy subclass —
@@ -10,7 +11,7 @@ import lt.escape.labyrinth.shared.PlayerState;
  * once it leaves the level).
  * Product in the Factory Method pattern.
  */
-public abstract class Bullet {
+public abstract class Bullet implements Prototype<Bullet> {
 
     private double x;
     private double y;
@@ -27,6 +28,15 @@ public abstract class Bullet {
         this.y = y;
         this.velocityX = directionX * speed;
         this.velocityY = directionY * speed;
+    }
+
+    /** Copy constructor for copy(), so bullets in flight are part of a checkpoint. */
+    protected Bullet(Bullet source) {
+        this.x = source.x;
+        this.y = source.y;
+        this.velocityX = source.velocityX;
+        this.velocityY = source.velocityY;
+        this.active = source.active;
     }
 
     /** Called by the server when this bullet hits a player. */

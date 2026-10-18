@@ -73,6 +73,13 @@ public class GameServer {
     // Prototype: the Level LevelDirector built, kept untouched. The game
     // always plays a copy of it, so restartLevel() can take a fresh one.
     private static Level levelTemplate;
+    private static Level currentLevel;
+
+    // Null until a player saves. Save/load are requested from the
+    // ClientHandler threads and done in updateGame(), on the game loop.
+    private static Checkpoint checkpoint;
+    private static volatile boolean saveRequested;
+    private static volatile boolean loadRequested;
 
     public static void main(String[] args) {
         System.out.println("Starting the server");
@@ -124,6 +131,7 @@ public class GameServer {
     }
 
     private static void loadLevel(Level level) {
+        currentLevel = level;
         levelWidth = level.getWidth();
         levelHeight = level.getHeight();
 
@@ -192,6 +200,32 @@ public class GameServer {
         loadLevel(levelTemplate.copy());
     }
 
+    static void requestSave() {
+        saveRequested = true;
+    }
+
+    static void requestLoad() {
+        loadRequested = true;
+    }
+
+    private static void saveCheckpoint() {
+        checkpoint = new Checkpoint(currentLevel, gameState.getPlayer1(), gameState.getPlayer2(), bullets).copy();
+        System.out.println("Checkpoint saved");
+    }
+
+    private static void loadCheckpoint() {
+        if (checkpoint == null) {
+            System.out.println("No checkpoint saved yet");
+            return;
+        }
+        Checkpoint saved = checkpoint.copy();
+        loadLevel(saved.getLevel());
+        gameState.getPlayer1().restoreFrom(saved.getPlayer1());
+        gameState.getPlayer2().restoreFrom(saved.getPlayer2());
+        bullets.addAll(saved.getBullets());
+        System.out.println("Checkpoint loaded");
+    }
+
     private static TileType tileTypeOf(Tile tile) {
         if (tile instanceof BluePuddle) {
             return TileType.BLUE_PUDDLE;
@@ -229,6 +263,15 @@ public class GameServer {
     }
 
     private static void updateGame() {
+        if (saveRequested) {
+            saveRequested = false;
+            saveCheckpoint();
+        }
+        if (loadRequested) {
+            loadRequested = false;
+            loadCheckpoint();
+        }
+
         PlayerState player1 = gameState.getPlayer1();
         PlayerState player2 = gameState.getPlayer2();
         List<PlayerState> players = List.of(player1, player2);

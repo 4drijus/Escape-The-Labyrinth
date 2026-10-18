@@ -14,6 +14,16 @@ public class NormalBullet extends Bullet {
         this.damage = damage;
     }
 
+    private NormalBullet(NormalBullet source) {
+        super(source);
+        this.damage = source.damage;
+    }
+
+    @Override
+    public NormalBullet copy() {
+        return new NormalBullet(this);
+    }
+
     @Override
     public void onHit(PlayerState player) {
         player.takeDamage(damage);

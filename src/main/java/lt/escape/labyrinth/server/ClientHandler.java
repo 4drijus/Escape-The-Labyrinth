@@ -88,6 +88,14 @@ public class ClientHandler implements Runnable {
                     player.setOnGround(false);
                 }
                 break;
+
+            case SAVE:
+                GameServer.requestSave();
+                break;
+
+            case LOAD:
+                GameServer.requestLoad();
+                break;
         }
 
         System.out.println("Player " + playerId + " velocityX = " + player.getVelocityX());

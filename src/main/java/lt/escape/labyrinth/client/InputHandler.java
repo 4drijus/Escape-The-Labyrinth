@@ -37,6 +37,8 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_D -> executeCommand(new MoveRightCommand(networkClient));
             case KeyEvent.VK_SPACE -> executeCommand(new JumpCommand(networkClient));
             case KeyEvent.VK_Z -> undoLastCommand(); // atšaukia paskutinę komandą
+            case KeyEvent.VK_F5 -> executeCommand(new SaveCommand(networkClient));
+            case KeyEvent.VK_F9 -> executeCommand(new LoadCommand(networkClient));
         }
     }
 

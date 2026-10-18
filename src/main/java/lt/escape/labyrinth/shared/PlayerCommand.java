@@ -4,5 +4,7 @@ public enum PlayerCommand {
     LEFT,
     RIGHT,
     STOP,
-    JUMP
+    JUMP,
+    SAVE,
+    LOAD
 }
