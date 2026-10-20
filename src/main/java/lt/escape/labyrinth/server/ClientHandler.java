@@ -100,7 +100,7 @@ public class ClientHandler implements Runnable {
      * times a second. This is what was missing entirely before: these
      * fields existed on GameState but nothing ever put them on the wire.
      */
-    private void sendLevelData() {
+    public void sendLevelData() {
         if (output == null) {
             return;
         }

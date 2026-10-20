@@ -1,5 +1,6 @@
 package lt.escape.labyrinth.server.interactive;
 
+import lt.escape.labyrinth.server.GameConstants;
 import lt.escape.labyrinth.shared.PlayerState;
 
 import java.util.List;
@@ -8,37 +9,13 @@ import java.util.List;
  * "Norint pabaigti lygį abu žaidėjai turi pasiekti išėjimo zoną. Vienas
  * žaidėjas ją pasiekęs žaidimo pabaigti negalės." Both players must be
  * standing inside the exit zone at the same time before the level ends.
+ *
+ * The zone's position and size are the bounds inherited from
+ * InteractiveElement (setBounds / getX / getY / getWidth / getHeight).
  */
 public class Exit extends InteractiveElement {
-    private final double positionX;
-    private final double positionY;
-    private final double width;
-    private final double height;
 
     private boolean gameEnded = false;
-
-    public Exit(double positionX, double positionY, double width, double height) {
-        this.positionX = positionX;
-        this.positionY = positionY;
-        this.width = width;
-        this.height = height;
-    }
-
-    public double getPositionX() {
-        return positionX;
-    }
-
-    public double getPositionY() {
-        return positionY;
-    }
-
-    public double getWidth() {
-        return width;
-    }
-
-    public double getHeight() {
-        return height;
-    }
 
     public boolean checkPlayerAmount(List<PlayerState> players) {
         for (PlayerState player : players) {
@@ -49,9 +26,15 @@ public class Exit extends InteractiveElement {
         return true;
     }
 
+    /**
+     * A player counts as "in the exit" when the centre of their 40x40 box is
+     * inside the zone.
+     */
     private boolean isInside(PlayerState player) {
-        return player.getX() >= positionX && player.getX() <= positionX + width
-                && player.getY() >= positionY && player.getY() <= positionY + height;
+        double centerX = player.getX() + GameConstants.PLAYER_WIDTH / 2;
+        double centerY = player.getY() + GameConstants.PLAYER_HEIGHT / 2;
+        return centerX >= getX() && centerX <= getX() + getWidth()
+                && centerY >= getY() && centerY <= getY() + getHeight();
     }
 
     /** Call once checkPlayerAmount() has returned true. */

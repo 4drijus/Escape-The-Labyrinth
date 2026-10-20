@@ -1,5 +1,6 @@
 package lt.escape.labyrinth.server.world;
 
+import lt.escape.labyrinth.server.GameConstants;
 import lt.escape.labyrinth.shared.PlayerState;
 
 /**
@@ -16,8 +17,10 @@ public abstract class Tile extends GameObject {
         super(positionX, positionY, width, height);
     }
 
+    /** Uses the player's whole 40x40 box, so a puddle lying on the floor is touched by a player standing on it. */
     public boolean isTouching(PlayerState player) {
-        return intersects(player.getX(), player.getY(), 1, 1);
+        return intersects(player.getX(), player.getY(),
+                GameConstants.PLAYER_WIDTH, GameConstants.PLAYER_HEIGHT);
     }
 
     /** No-op by default (Wall, Bush); puddle subclasses override this. */

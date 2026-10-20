@@ -1,5 +1,7 @@
 package lt.escape.labyrinth.server;
 
+import lt.escape.labyrinth.server.interactive.*;
+import lt.escape.labyrinth.server.level.*;
 import lt.escape.labyrinth.shared.GameState;
 import lt.escape.labyrinth.shared.PlayerState;
 import lt.escape.labyrinth.shared.EnemyState;
@@ -14,13 +16,6 @@ import lt.escape.labyrinth.shared.ExitState;
 import lt.escape.labyrinth.server.enemy.Enemy;
 import lt.escape.labyrinth.server.enemy.SpikyBush;
 import lt.escape.labyrinth.server.enemy.Bullet;
-import lt.escape.labyrinth.server.interactive.Door;
-import lt.escape.labyrinth.server.interactive.Button;
-import lt.escape.labyrinth.server.interactive.PressurePlate;
-import lt.escape.labyrinth.server.interactive.NormalElementFactory;
-import lt.escape.labyrinth.server.interactive.Exit;
-import lt.escape.labyrinth.server.level.Level;
-import lt.escape.labyrinth.server.level.LevelDirector;
 import lt.escape.labyrinth.server.world.BlackPuddle;
 import lt.escape.labyrinth.server.world.BluePuddle;
 import lt.escape.labyrinth.server.world.Box;
@@ -38,6 +33,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static lt.escape.labyrinth.server.GameConstants.BULLET_SIZE;
+import static lt.escape.labyrinth.server.GameConstants.PLAYER_HEIGHT;
+import static lt.escape.labyrinth.server.GameConstants.PLAYER_WIDTH;
+
 public class GameServer {
     private static final int PORT = 5000;
     private static int nextPlayerId = 1;
@@ -46,23 +45,29 @@ public class GameServer {
     private static ClientHandler player1Handler;
     private static ClientHandler player2Handler;
 
-    // Set from the Level in loadLevel(), before the game loop thread starts.
-    // (updatePlayer() below still hardcodes 960 / 480 for the player bounds.)
-    private static double levelWidth;
-    private static double levelHeight;
-
     private static final double DELTA_TIME_SECONDS = 16.0 / 1000.0;
+
+    // ---- level sequence (Builder pattern: one Director, one concrete builder per level) ----
+    private static final LevelDirector levelDirector = new LevelDirector();
+    private static List<ILevelBuilder> levelBuilders;
+    private static int currentLevelIndex = 0;
+
+    // ---- state of the level that is currently loaded ----
+    private static double levelHeight;
+    private static double levelWidth;
 
     // Filled from the Level in loadLevel().
     private static final List<Enemy> enemies = new ArrayList<>();
-
     private static final List<Bullet> bullets = new ArrayList<>();
 
     private static Door door;
-    private static Level.Rect doorRect; // position only; Door itself carries no x/y
     private static Button button;
     private static PressurePlate pressurePlate;
-    private static Exit exit; // nullable -- not every level configures one yet
+    private static Exit exit;
+
+    // Edge detection, so press()/trigger()/release() fire once per step on/off, not every tick.
+    private static boolean buttonTouched;
+    private static boolean plateOccupied;
 
     private static List<Wall> walls = new ArrayList<>();
     private static List<Tile> tiles = new ArrayList<>();
@@ -76,10 +81,15 @@ public class GameServer {
         gameState = GameState.getInstance();
         System.out.println("Game state created");
 
-        //loadLevel(LevelDirector.buildLevelOne(new NormalElementFactory()));
-        //loadLevel(LevelDirector.buildLevelTwo(new NormalElementFactory()));
-        //loadLevel(LevelDirector.buildLevelThree(new NormalElementFactory()));
-        loadLevel(LevelDirector.buildLevelFour(new NormalElementFactory()));   //TODO pasiziuret kaip pakeist lygiu ir pan.
+        InteractiveElementFactory elementFactory = new NormalElementFactory();
+        // A level = a difficulty (builder) + a map (layout). Mix freely, e.g.
+        // new HardLevelBuilder(elementFactory, LevelLayout.plains()) is a new level with no new class.
+        levelBuilders = List.of(
+                new EasyLevelBuilder(elementFactory, LevelLayout.plains()),
+                new MediumLevelBuilder(elementFactory, LevelLayout.hill()),
+                new HardLevelBuilder(elementFactory, LevelLayout.tower())
+        );
+        startLevel(currentLevelIndex);
 
         Thread gameThread = new Thread(GameServer::gameLoop);
 
@@ -118,15 +128,50 @@ public class GameServer {
         }
     }
 
+    /** Asks the Director to assemble level number `index` with its concrete builder, then loads it. */
+    private static void startLevel(int index) {
+        System.out.println("Starting level " + (index + 1));
+        Level level = levelDirector.construct(levelBuilders.get(index));
+        loadLevel(level);
+    }
+
+    /** Called when both players stand in the exit: loads the next level and tells both clients. */
+    private static void advanceToNextLevel() {
+        System.out.println("Level " + (currentLevelIndex + 1) + " complete!");
+
+        currentLevelIndex++;
+        if (currentLevelIndex >= levelBuilders.size()) {
+            System.out.println("All levels complete -- starting again from level 1");
+            currentLevelIndex = 0;
+        }
+
+        startLevel(currentLevelIndex);
+        broadcastLevelData(); // walls/tiles/door/... changed, clients need the new layout
+    }
+
+    private static void broadcastLevelData() {
+        if (player1Handler != null) {
+            player1Handler.sendLevelData();
+        }
+        if (player2Handler != null) {
+            player2Handler.sendLevelData();
+        }
+    }
+
     private static void loadLevel(Level level) {
         levelWidth = level.getWidth();
         levelHeight = level.getHeight();
 
+        enemies.clear();
         enemies.addAll(level.getEnemies());
+        bullets.clear();
+
         door = level.getDoor();
         button = level.getButton();
         pressurePlate = level.getPressurePlate();
         exit = level.getExit();
+        buttonTouched = false;
+        plateOccupied = false;
 
         walls = level.getWalls();
         tiles = level.getTiles();
@@ -134,8 +179,7 @@ public class GameServer {
         boxes = level.getBoxes();
         potions = level.getPotions();
 
-        // Build the one-time render snapshots GameState exposes to the
-        // client (via ClientHandler's "LEVEL:" message)
+        // Render snapshots that ClientHandler sends to the clients.
         List<WallState> wallStates = new ArrayList<>();
         for (Wall wall : walls) {
             wallStates.add(new WallState(wall.getPositionX(), wall.getPositionY(), wall.getWidth(), wall.getHeight()));
@@ -148,35 +192,31 @@ public class GameServer {
         }
         gameState.setTiles(tileStates);
 
-        doorRect = level.getDoorRect();
-        if (doorRect != null) {
-            gameState.setDoor(new DoorState(doorRect.x, doorRect.y, doorRect.width, doorRect.height, door.isOpen()));
-        }
+        gameState.setDoor(door == null ? null
+                : new DoorState(door.getX(), door.getY(), door.getWidth(), door.getHeight(), door.isOpen()));
+        gameState.setButton(button == null ? null
+                : new ButtonState(button.getX(), button.getY(), button.getWidth(), button.getHeight()));
+        gameState.setPressurePlate(pressurePlate == null ? null
+                : new PressurePlateState(pressurePlate.getX(), pressurePlate.getY(), pressurePlate.getWidth(), pressurePlate.getHeight()));
+        gameState.setExit(exit == null ? null
+                : new ExitState(exit.getX(), exit.getY(), exit.getWidth(), exit.getHeight()));
 
-        Level.Rect buttonRect = level.getButtonRect();
-        if (buttonRect != null) {
-            gameState.setButton(new ButtonState(buttonRect.x, buttonRect.y, buttonRect.width, buttonRect.height));
-        }
+        gameState.getEnemies().clear();
+        initEnemyStates();
+        gameState.setBullets(new ArrayList<>());
 
-        Level.Rect pressurePlateRect = level.getPressurePlateRect();
-        if (pressurePlateRect != null) {
-            gameState.setPressurePlate(new PressurePlateState(
-                    pressurePlateRect.x, pressurePlateRect.y, pressurePlateRect.width, pressurePlateRect.height));
-        }
-
-        if (exit != null) {
-            gameState.setExit(new ExitState(exit.getPositionX(), exit.getPositionY(), exit.getWidth(), exit.getHeight()));
-        }
-
+        // Put both players at this level's start positions, standing still.
         PlayerState player1 = gameState.getPlayer1();
         player1.setX(level.getPlayer1StartX());
         player1.setY(level.getPlayer1StartY());
+        player1.setVelocityX(0);
+        player1.setVelocityY(0);
 
         PlayerState player2 = gameState.getPlayer2();
         player2.setX(level.getPlayer2StartX());
         player2.setY(level.getPlayer2StartY());
-
-        initEnemyStates();
+        player2.setVelocityX(0);
+        player2.setVelocityY(0);
     }
 
     private static TileType tileTypeOf(Tile tile) {
@@ -193,6 +233,13 @@ public class GameServer {
             return TileType.BUSH;
         }
         throw new IllegalArgumentException("Unknown tile type: " + tile.getClass());
+    }
+
+    /** Mirrors the loaded level's enemies into gameState's shared EnemyState snapshots. */
+    private static void initEnemyStates() {
+        for (Enemy enemy : enemies) {
+            gameState.getEnemies().add(new EnemyState(enemy.getType(), enemy.getX(), enemy.getY()));
+        }
     }
 
     private static void gameLoop() {
@@ -229,12 +276,65 @@ public class GameServer {
         checkTileEffects(players);
         checkPotions(players);
         updateLifts();
-        checkExit(players);
-        door.update(DELTA_TIME_SECONDS);//keeping here for now
-        if (gameState.getDoor() != null) {
-            gameState.getDoor().setOpen(door.isOpen());
+        checkSwitches(players);
+
+        if (door != null) {
+            door.update(DELTA_TIME_SECONDS);
+            if (gameState.getDoor() != null) {
+                gameState.getDoor().setOpen(door.isOpen());
+            }
         }
+
+        // Last on purpose: this may replace the whole level.
+        checkExit(players);
+
         broadcastGameState();
+    }
+
+    /** Both players inside the exit zone -> next level, automatically. */
+    private static void checkExit(List<PlayerState> players) {
+        if (exit == null || exit.isGameEnded()) {
+            return;
+        }
+        if (exit.checkPlayerAmount(players)) {
+            exit.endGame();
+            advanceToNextLevel();
+        }
+    }
+
+    /**
+     * Touching the button presses it once; stepping on the pressure plate
+     * triggers it, stepping off releases it. Nothing called these before,
+     * so no door could ever be opened.
+     */
+    private static void checkSwitches(List<PlayerState> players) {
+        if (button != null) {
+            boolean touched = anyPlayerOverlaps(players, button);
+            if (touched && !buttonTouched) {
+                button.press();
+            }
+            buttonTouched = touched;
+        }
+
+        if (pressurePlate != null) {
+            boolean occupied = anyPlayerOverlaps(players, pressurePlate);
+            if (occupied && !plateOccupied) {
+                pressurePlate.trigger();
+            } else if (!occupied && plateOccupied) {
+                pressurePlate.release();
+            }
+            plateOccupied = occupied;
+        }
+    }
+
+    private static boolean anyPlayerOverlaps(List<PlayerState> players, InteractiveElement element) {
+        for (PlayerState player : players) {
+            if (rectsIntersect(player.getX(), player.getY(), PLAYER_WIDTH, PLAYER_HEIGHT,
+                    element.getX(), element.getY(), element.getWidth(), element.getHeight())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Puddles and bushes -- whatever each Tile's onPlayerContact() does. */
@@ -264,23 +364,6 @@ public class GameServer {
         }
     }
 
-    /** No-op until a level actually configures an Exit with withExit(). */
-    private static void checkExit(List<PlayerState> players) {
-        if (exit == null || exit.isGameEnded()) {
-            return;
-        }
-        if (exit.checkPlayerAmount(players)) {
-            exit.endGame();
-            System.out.println("Both players reached the exit -- level complete");
-        }
-    }
-
-    /** Mirrors the (fixed, hardcoded-for-now) enemies list into gameState's shared EnemyState snapshots, one time, at startup. */
-    private static void initEnemyStates() {
-        for (Enemy enemy : enemies) {
-            gameState.getEnemies().add(new EnemyState(enemy.getType(), enemy.getX(), enemy.getY()));
-        }
-    }
 
     private static void updateEnemies(List<PlayerState> players) {
         List<EnemyState> enemyStates = gameState.getEnemies();
@@ -330,7 +413,7 @@ public class GameServer {
     // Matches the 8x8 sprite size from Assets. Bullet's own HIT_RADIUS
     // (used for hitting players) is private with no getter, so this is
     // an independent, server-side-only size just for wall collision.
-    private static final double BULLET_SIZE = 8;    // for now ig
+    private static final double BULLET_SIZE = 8;    // TODO ar neperkelti
 
     private static boolean hitsWall(Bullet bullet) {
         for (Wall wall : walls) {
@@ -366,7 +449,7 @@ public class GameServer {
     // Matches the 40x40 size the player sprites are drawn at in GamePanel.
     // PlayerState has no width/height field, so this is the best collision
     // box available without adding one.
-    private static final double PLAYER_WIDTH = 40;
+    private static final double PLAYER_WIDTH = 40;  //TODO ar tikrai cia
     private static final double PLAYER_HEIGHT = 40;
 
     /**
@@ -393,13 +476,13 @@ public class GameServer {
                 }
             }
         }
-        if (doorRect != null && !door.isOpen()
-                && rectsIntersect(newX, player.getY(), PLAYER_WIDTH, PLAYER_HEIGHT,
-                doorRect.x, doorRect.y, doorRect.width, doorRect.height)) {
+
+        // A closed door blocks movement exactly like a Wall; an open one doesn't.
+        if (doorBlocks(newX, player.getY())) {
             if (player.getVelocityX() > 0) {
-                newX = doorRect.x - PLAYER_WIDTH;
+                newX = door.getX() - PLAYER_WIDTH;
             } else if (player.getVelocityX() < 0) {
-                newX = doorRect.x + doorRect.width;
+                newX = door.getX() + door.getWidth();
             }
         }
 
@@ -426,15 +509,13 @@ public class GameServer {
             }
         }
 
-        if (doorRect != null && !door.isOpen()
-                && rectsIntersect(player.getX(), newY, PLAYER_WIDTH, PLAYER_HEIGHT,
-                doorRect.x, doorRect.y, doorRect.width, doorRect.height)) {
+        if (doorBlocks(player.getX(), newY)) {
             if (player.getVelocityY() > 0) {
-                newY = doorRect.y - PLAYER_HEIGHT;
+                newY = door.getY() - PLAYER_HEIGHT;
                 player.setVelocityY(0);
                 onGround = true;
             } else if (player.getVelocityY() < 0) {
-                newY = doorRect.y + doorRect.height;
+                newY = door.getY() + door.getHeight();
                 player.setVelocityY(0);
             }
         }
@@ -443,7 +524,14 @@ public class GameServer {
         player.setOnGround(onGround);
     }
 
-    /** Plain AABB overlap test -- used for the door, which (unlike Wall) has no intersects() of its own. */
+    /** True if the door is closed and a player box at (x, y) would overlap it. */
+    private static boolean doorBlocks(double x, double y) {
+        return door != null && !door.isOpen()
+                && rectsIntersect(x, y, PLAYER_WIDTH, PLAYER_HEIGHT,
+                door.getX(), door.getY(), door.getWidth(), door.getHeight());
+    }
+
+    /** Plain AABB overlap test, for interactive elements, which expose bounds but no intersects() of their own. */
     private static boolean rectsIntersect(double ax, double ay, double aw, double ah,
                                           double bx, double by, double bw, double bh) {
         return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
