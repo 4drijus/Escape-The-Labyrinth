@@ -50,8 +50,8 @@ public class HardLevelBuilder extends AbstractLevelBuilder {
         shifter.setBehaviorRotation(4.0,
                 new PatrolBehavior(150, 80),
                 new VerticalPatrolBehavior(70, 80),
-                new ZigZagBehavior(120, 60, 80));
-                //new ChaseBehavior(50, 120));
+                new ZigZagBehavior(120, 60, 80),
+                new ChaseBehavior(50, 120));
         level.addEnemy(shifter);
 
         LevelLayout.Area sniperSpot = layout.getTurretSlots().get(1);

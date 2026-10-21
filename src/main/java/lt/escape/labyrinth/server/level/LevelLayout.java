@@ -127,6 +127,39 @@ public final class LevelLayout {
         return l;
     }
 
+    /** A cave level with narrow passages and a pit in the middle */
+    public static LevelLayout cave() {
+        LevelLayout l = new LevelLayout();
+
+        // Floor
+        l.addWall(0, 520, 960, 60);
+
+        // Walls forming a cave with a pit
+        l.addWall(100, 470, 80, 50);   // Left platform
+        l.addWall(260, 420, 80, 100);  // Middle left
+        l.addWall(420, 420, 80, 50);  // Middle right
+        l.addWall(580, 470, 80, 50);   // Right platform
+        l.addWall(340, 360, 200, 65); // Ceiling over the pit
+
+        l.player1Start = rect(120, 430, 40, 40);
+        l.player2Start = rect(440, 500, 40, 40);
+        l.door = rect(780, 420, 40, 100);
+        l.button = rect(350, 440, 30, 30);
+        l.exit = rect(830, 440, 130, 80);
+
+        // Hazard slots
+        l.groundSlots.add(rect(150, 440, 30, 30));    // Left platform
+        l.groundSlots.add(rect(500, 440, 30, 30));    // Right platform
+        l.puddleSlots.add(rect(200, 510, 50, 10));    // Floor puddle
+        l.puddleSlots.add(rect(300, 510, 50, 10));
+        l.puddleSlots.add(rect(650, 510, 40, 10));
+        l.coverSlots.add(rect(280, 430, 40, 30));
+        l.turretSlots.add(rect(300, 150, 30, 30));
+        l.turretSlots.add(rect(600, 150, 30, 30));
+
+        return l;
+    }
+
     // ---------------------------------------------------------------
 
     private void addWall(double x, double y, double w, double h) {
