@@ -23,35 +23,23 @@ import lt.escape.labyrinth.server.world.Wall;
  * LevelDirector at all.
  */
 public interface ILevelBuilder {
-    ILevelBuilder withDimensions(double width, double height);
 
-    ILevelBuilder withPlayerStarts(double player1X, double player1Y, double player2X, double player2Y);
+    void reset();
 
-    ILevelBuilder addEnemy(Enemy enemy);
+    void buildDimensions();
 
-    ILevelBuilder addEnemy(Enemy enemy, Behavior startingBehavior);
+    void buildPlayerStarts();
 
-    ILevelBuilder withDoor(Door door, double x, double y, double width, double height);
+    void buildWalls();
 
-    ILevelBuilder withButton(Button button, double x, double y, double width, double height);
+    void buildTiles();
 
-    ILevelBuilder withPressurePlate(PressurePlate pressurePlate, double x, double y, double width, double height);
+    void buildEnemies();
 
-    ILevelBuilder withLever(Lever lever);
+    void buildDoorAndSwitches();
 
-    ILevelBuilder withExit(Exit exit);
+    void buildExit();
 
-    ILevelBuilder addWall(Wall wall);
-
-    ILevelBuilder addTile(Tile tile);
-
-    ILevelBuilder addLift(Lift lift);
-
-    ILevelBuilder addBox(Box box);
-
-    ILevelBuilder addPotion(Potion potion);
-
-    ILevelBuilder addSign(Sign sign);
-
-    Level build();
+    /** Hands over the finished Level. */
+    Level getResult();
 }

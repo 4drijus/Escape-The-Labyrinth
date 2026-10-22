@@ -24,7 +24,7 @@ public class Lever extends InteractiveElement {
 
     /** Prototype, like Button.copyFor(): same lever position, linked to the copied door. */
     public Lever copyFor(Door door) {
-        Lever copy = new Lever(door);
+        Lever copy = copyBoundsTo(new Lever(door));
         copy.state = state;
         return copy;
     }

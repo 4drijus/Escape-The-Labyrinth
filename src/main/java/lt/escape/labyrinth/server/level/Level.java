@@ -14,149 +14,106 @@ import lt.escape.labyrinth.server.world.Tile;
 import lt.escape.labyrinth.server.world.Wall;
 import lt.escape.labyrinth.shared.Prototype;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Builder pattern "product": a fully assembled level, ready to hand to
- * GameServer. Package-private constructor: only LevelBuilder (same
- * package) can create one, so a Level can never exist half-built.
+ * Builder pattern "product". It has no constructor of its own: a builder
+ * creates an empty Level and fills it step by step through the
+ * package-private methods below. Nothing outside this package can change
+ * a Level; everyone else only reads it through the public getters.
  *
- * Door/Button/PressurePlate carry no position of their own (confirmed
- * from the real Door.java/InteractiveElement.java -- neither has x/y),
- * so Level tracks a Rect alongside each one instead of modifying those
- * classes.
+ * Door, Button, PressurePlate and Exit carry their own position (see
+ * InteractiveElement.setBounds), so Level just holds the elements.
  */
 public class Level implements Prototype<Level> {
 
-    /** Simple position+size bundle, since Door/Button/PressurePlate don't carry their own. */
-    public static final class Rect {
-        public final double x;
-        public final double y;
-        public final double width;
-        public final double height;
+    private double width = 960;
+    private double height = 600;
 
-        public Rect(double x, double y, double width, double height) {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-        }
-    }
+    private double player1StartX = 500;
+    private double player1StartY = 480;
+    private double player2StartX = 100;
+    private double player2StartY = 480;
 
-    private final double width;
-    private final double height;
+    private final List<Enemy> enemies = new ArrayList<>();
+    private final List<Wall> walls = new ArrayList<>();
+    private final List<Tile> tiles = new ArrayList<>();
+    private final List<Lift> lifts = new ArrayList<>();
+    private final List<Box> boxes = new ArrayList<>();
+    private final List<Potion> potions = new ArrayList<>();
+    private final List<Sign> signs = new ArrayList<>();
 
-    private final double player1StartX;
-    private final double player1StartY;
-    private final double player2StartX;
-    private final double player2StartY;
+    private Door door;
+    private Button button;
+    private PressurePlate pressurePlate;
+    private Lever lever;
+    private Exit exit;
 
-    private final List<Enemy> enemies;
+    // ---- used by the builders (same package) ----
 
-    private final Door door;
-    private final Rect doorRect;
-    private final Button button;
-    private final Rect buttonRect;
-    private final PressurePlate pressurePlate;
-    private final Rect pressurePlateRect;
-    private final Lever lever;
-    private final Exit exit;
-
-    private final List<Wall> walls;
-    private final List<Tile> tiles;
-    private final List<Lift> lifts;
-    private final List<Box> boxes;
-    private final List<Potion> potions;
-    private final List<Sign> signs;
-
-    Level(double width, double height,
-          double player1StartX, double player1StartY,
-          double player2StartX, double player2StartY,
-          List<Enemy> enemies,
-          Door door, Rect doorRect,
-          Button button, Rect buttonRect,
-          PressurePlate pressurePlate, Rect pressurePlateRect,
-          Lever lever, Exit exit,
-          List<Wall> walls, List<Tile> tiles, List<Lift> lifts, List<Box> boxes,
-          List<Potion> potions, List<Sign> signs) {
+    void setDimensions(double width, double height) {
         this.width = width;
         this.height = height;
-        this.player1StartX = player1StartX;
-        this.player1StartY = player1StartY;
-        this.player2StartX = player2StartX;
-        this.player2StartY = player2StartY;
-        this.enemies = enemies;
+    }
+
+    void setPlayerStarts(double p1X, double p1Y, double p2X, double p2Y) {
+        this.player1StartX = p1X;
+        this.player1StartY = p1Y;
+        this.player2StartX = p2X;
+        this.player2StartY = p2Y;
+    }
+
+    void addEnemy(Enemy enemy) {
+        enemies.add(enemy);
+    }
+
+    void addWall(Wall wall) {
+        walls.add(wall);
+    }
+
+    void addTile(Tile tile) {
+        tiles.add(tile);
+    }
+
+    void addLift(Lift lift) {
+        lifts.add(lift);
+    }
+
+    void addBox(Box box) {
+        boxes.add(box);
+    }
+
+    void addPotion(Potion potion) {
+        potions.add(potion);
+    }
+
+    void addSign(Sign sign) {
+        signs.add(sign);
+    }
+
+    void setDoor(Door door) {
         this.door = door;
-        this.doorRect = doorRect;
+    }
+
+    void setButton(Button button) {
         this.button = button;
-        this.buttonRect = buttonRect;
+    }
+
+    void setPressurePlate(PressurePlate pressurePlate) {
         this.pressurePlate = pressurePlate;
-        this.pressurePlateRect = pressurePlateRect;
+    }
+
+    void setLever(Lever lever) {
         this.lever = lever;
+    }
+
+    void setExit(Exit exit) {
         this.exit = exit;
-        this.walls = walls;
-        this.tiles = tiles;
-        this.lifts = lifts;
-        this.boxes = boxes;
-        this.potions = potions;
-        this.signs = signs;
     }
 
-    /**
-     * Prototype: an independent copy of this level, so GameServer can keep
-     * one level LevelDirector built as an untouched template and restart
-     * from a copy of it instead of running the recipe again.
-     */
-    @Override
-    public Level copy() {
-        Door doorCopy = door.copy();
-
-        ILevelBuilder builder = new LevelBuilder()
-                .withDimensions(width, height)
-                .withPlayerStarts(player1StartX, player1StartY, player2StartX, player2StartY)
-                .withDoor(doorCopy, doorRect.x, doorRect.y, doorRect.width, doorRect.height);
-
-        if (button != null) {
-            builder.withButton(button.copyFor(doorCopy),
-                    buttonRect.x, buttonRect.y, buttonRect.width, buttonRect.height);
-        }
-        if (pressurePlate != null) {
-            builder.withPressurePlate(pressurePlate.copyFor(doorCopy),
-                    pressurePlateRect.x, pressurePlateRect.y, pressurePlateRect.width, pressurePlateRect.height);
-        }
-        if (lever != null) {
-            builder.withLever(lever.copyFor(doorCopy));
-        }
-        if (exit != null) {
-            builder.withExit(exit.copy());
-        }
-
-        // addEnemy(enemy) keeps the copied enemy's own (copied) Behavior.
-        for (Enemy enemy : enemies) {
-            builder.addEnemy(enemy.copy());
-        }
-        for (Lift lift : lifts) {
-            builder.addLift(lift.copy());
-        }
-        for (Box box : boxes) {
-            builder.addBox(box.copy());
-        }
-        for (Potion potion : potions) {
-            builder.addPotion(potion.copy());
-        }
-
-        for (Wall wall : walls) {
-            builder.addWall(wall);
-        }
-        for (Tile tile : tiles) {
-            builder.addTile(tile);
-        }
-        for (Sign sign : signs) {
-            builder.addSign(sign);
-        }
-
-        return builder.build();
-    }
+    // ---- read-only access for everyone else ----
 
     public double getWidth() {
         return width;
@@ -183,66 +140,110 @@ public class Level implements Prototype<Level> {
     }
 
     public List<Enemy> getEnemies() {
-        return enemies;
+        return Collections.unmodifiableList(enemies);
+    }
+
+    public List<Wall> getWalls() {
+        return Collections.unmodifiableList(walls);
+    }
+
+    /** Puddles and bushes. */
+    public List<Tile> getTiles() {
+        return Collections.unmodifiableList(tiles);
+    }
+
+    public List<Lift> getLifts() {
+        return Collections.unmodifiableList(lifts);
+    }
+
+    public List<Box> getBoxes() {
+        return Collections.unmodifiableList(boxes);
+    }
+
+    public List<Potion> getPotions() {
+        return Collections.unmodifiableList(potions);
+    }
+
+    public List<Sign> getSigns() {
+        return Collections.unmodifiableList(signs);
     }
 
     public Door getDoor() {
         return door;
     }
 
-    /** Nullable -- only set if withDoor() was called with a position. */
-    public Rect getDoorRect() {
-        return doorRect;
-    }
-
     public Button getButton() {
         return button;
-    }
-
-    public Rect getButtonRect() {
-        return buttonRect;
     }
 
     public PressurePlate getPressurePlate() {
         return pressurePlate;
     }
 
-    public Rect getPressurePlateRect() {
-        return pressurePlateRect;
-    }
-
-    /** Nullable -- not every level has a lever. */
+    /** Nullable. */
     public Lever getLever() {
         return lever;
     }
 
-    /** Nullable -- not every level needs a configured exit yet. */
+    /** Nullable. */
     public Exit getExit() {
         return exit;
     }
 
-    public List<Wall> getWalls() {
-        return walls;
-    }
+    // ---- Prototype ----
 
-    /** Puddles and bushes -- anything with an onPlayerContact() effect. */
-    public List<Tile> getTiles() {
-        return tiles;
-    }
+    /**
+     * Prototype: an independent copy of this level, so GameWorld can keep
+     * the level the Director built as an untouched template and restart
+     * from a copy of it instead of running the recipe again.
+     */
+    @Override
+    public Level copy() {
+        Level copy = new Level();
+        copy.setDimensions(width, height);
+        copy.setPlayerStarts(player1StartX, player1StartY, player2StartX, player2StartY);
 
-    public List<Lift> getLifts() {
-        return lifts;
-    }
+        // Parts that change during play get their own copies...
+        for (Enemy enemy : enemies) {
+            copy.addEnemy(enemy.copy());
+        }
+        for (Lift lift : lifts) {
+            copy.addLift(lift.copy());
+        }
+        for (Box box : boxes) {
+            copy.addBox(box.copy());
+        }
+        for (Potion potion : potions) {
+            copy.addPotion(potion.copy());
+        }
+        if (exit != null) {
+            copy.setExit(exit.copy());
+        }
 
-    public List<Box> getBoxes() {
-        return boxes;
-    }
+        // ...the switches are linked to the copied door, not this one...
+        Door doorCopy = door == null ? null : door.copy();
+        copy.setDoor(doorCopy);
+        if (button != null) {
+            copy.setButton(button.copyFor(doorCopy));
+        }
+        if (pressurePlate != null) {
+            copy.setPressurePlate(pressurePlate.copyFor(doorCopy));
+        }
+        if (lever != null) {
+            copy.setLever(lever.copyFor(doorCopy));
+        }
 
-    public List<Potion> getPotions() {
-        return potions;
-    }
+        // ...and walls, tiles and signs never change, so both levels share them.
+        for (Wall wall : walls) {
+            copy.addWall(wall);
+        }
+        for (Tile tile : tiles) {
+            copy.addTile(tile);
+        }
+        for (Sign sign : signs) {
+            copy.addSign(sign);
+        }
 
-    public List<Sign> getSigns() {
-        return signs;
+        return copy;
     }
 }

@@ -49,7 +49,7 @@ public class GamePanel extends JPanel implements IObserver {
 
     public GamePanel(NetworkClient networkClient) {
         this.networkClient = networkClient;
-        setBackground(Color.DARK_GRAY);
+        setBackground(new Color(90, 88, 71));
 
         inputHandler = new InputHandler(networkClient);
         addKeyListener(inputHandler);

@@ -8,15 +8,19 @@ import java.util.List;
 
 /**
  * Strategy interface. A concrete Behavior decides how an Enemy moves on
- * each game tick.
- *
- * walls was added so movement strategies can respect level geometry --
- * PatrolBehavior now turns around at a Wall instead of only at its
- * fixed range. StationaryBehavior ignores it (it never moves anyway).
- * A future chase-style Behavior would use it the same way.
+ * each game tick. Enemy holds one and can swap it at runtime.
  *
  * Enemy.copy() copies its Behavior
  */
 public interface Behavior extends Prototype<Behavior> {
     void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime);
+
+    /**
+     * Called by Enemy.setBehavior() whenever this strategy becomes the
+     * active one. Strategies that remember a starting point (patrols,
+     * zig-zag) forget it here, so they re-anchor at wherever the enemy
+     * is NOW instead of snapping back to an old position.
+     */
+    default void reset() {
+    }
 }

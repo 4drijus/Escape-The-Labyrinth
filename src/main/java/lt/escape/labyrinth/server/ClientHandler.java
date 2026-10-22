@@ -1,5 +1,6 @@
 package lt.escape.labyrinth.server;
 
+import lt.escape.labyrinth.server.engine.GameWorld;
 import lt.escape.labyrinth.shared.GameState;
 import lt.escape.labyrinth.shared.PlayerCommand;
 import lt.escape.labyrinth.shared.PlayerState;
@@ -22,15 +23,17 @@ import java.util.List;
 public class ClientHandler implements Runnable {
     private final Socket socket;
     private final int playerId;
+    private final GameWorld world;
     private final GameState gameState;
 
     private PrintWriter output;
     private BufferedReader input;
 
-    public ClientHandler(Socket socket, int playerId, GameState gameState) {
+    public ClientHandler(Socket socket, int playerId, GameWorld world) {
         this.socket = socket;
         this.playerId = playerId;
-        this.gameState = gameState;
+        this.world = world;
+        this.gameState = world.getState();
     }
 
     @Override
@@ -63,42 +66,7 @@ public class ClientHandler implements Runnable {
 
 
     private void handleCommand(PlayerCommand command) {
-        PlayerState player = gameState.getPlayer(playerId);
-
-        if (player == null) {
-            return;
-        }
-
-        switch (command) {
-            case LEFT:
-                player.setVelocityX(-4);
-                break;
-
-            case RIGHT:
-                player.setVelocityX(4);
-                break;
-
-            case STOP:
-                player.setVelocityX(0);
-                break;
-
-            case JUMP:
-                if (player.isOnGround()) {
-                    player.setVelocityY(-8);
-                    player.setOnGround(false);
-                }
-                break;
-
-            case SAVE:
-                GameServer.requestSave();
-                break;
-
-            case LOAD:
-                GameServer.requestLoad();
-                break;
-        }
-
-        System.out.println("Player " + playerId + " velocityX = " + player.getVelocityX());
+        world.applyCommand(playerId, command);
     }
 
     /**
@@ -108,7 +76,7 @@ public class ClientHandler implements Runnable {
      * times a second. This is what was missing entirely before: these
      * fields existed on GameState but nothing ever put them on the wire.
      */
-    private void sendLevelData() {
+    public void sendLevelData() {
         if (output == null) {
             return;
         }
