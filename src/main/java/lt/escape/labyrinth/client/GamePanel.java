@@ -17,6 +17,8 @@ import lt.escape.labyrinth.shared.ButtonState;
 import lt.escape.labyrinth.shared.DoorState;
 import lt.escape.labyrinth.shared.EnemyState;
 import lt.escape.labyrinth.shared.ExitState;
+import lt.escape.labyrinth.shared.LeverState;
+import lt.escape.labyrinth.shared.LiftState;
 import lt.escape.labyrinth.shared.PressurePlateState;
 import lt.escape.labyrinth.shared.TileState;
 import lt.escape.labyrinth.shared.WallState;
@@ -87,6 +89,12 @@ public class GamePanel extends JPanel implements IObserver {
             g.fillRect((int) wall.getX(), (int) wall.getY(), (int) wall.getWidth(), (int) wall.getHeight());
         }
 
+        // Lifts -- moving platforms, solid like walls.
+        g.setColor(new Color(120, 120, 140));
+        for (LiftState lift : state.getLifts()) {
+            g.fillRect((int) lift.getX(), (int) lift.getY(), (int) lift.getWidth(), (int) lift.getHeight());
+        }
+
         // Tiles -- puddles and bushes, colored by type until real sprites exist.
         for (TileState tile : state.getTiles()) {
             g.setColor(colorFor(tile));
@@ -105,6 +113,19 @@ public class GamePanel extends JPanel implements IObserver {
         if (button != null) {
             g.setColor(new Color(255, 236, 1));
             g.fillRect((int) button.getX(), (int) button.getY(), (int) button.getWidth(), (int) button.getHeight());
+        }
+
+        // Lever -- a base with a handle: tilted right and green when pulled, left and red when not.
+        LeverState lever = state.getLever();
+        if (lever != null) {
+            int x = (int) lever.getX();
+            int y = (int) lever.getY();
+            int w = (int) lever.getWidth();
+            int h = (int) lever.getHeight();
+            g.setColor(new Color(110, 110, 110));
+            g.fillRect(x, y + h / 2, w, h / 2);
+            g.setColor(lever.isOn() ? new Color(26, 155, 127) : new Color(200, 60, 40));
+            g.drawLine(x + w / 2, y + h / 2, lever.isOn() ? x + w : x, y - h / 2);
         }
 
         // Door -- solid while closed; outline-only once open, since the

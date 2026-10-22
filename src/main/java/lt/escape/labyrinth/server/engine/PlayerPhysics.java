@@ -2,10 +2,11 @@ package lt.escape.labyrinth.server.engine;
 
 import lt.escape.labyrinth.server.interactive.Door;
 import lt.escape.labyrinth.server.level.Level;
-import lt.escape.labyrinth.server.world.Wall;
+import lt.escape.labyrinth.server.world.GameObject;
 import lt.escape.labyrinth.shared.PlayerCommand;
 import lt.escape.labyrinth.shared.PlayerState;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static lt.escape.labyrinth.server.GameConstants.PLAYER_HEIGHT;
@@ -15,6 +16,7 @@ import static lt.escape.labyrinth.server.GameConstants.PLAYER_WIDTH;
  * SUBSYSTEM: how players move. Turns commands into velocities, applies
  * gravity, and resolves collisions. Walls are the only floor, and walls plus
  * a closed door block movement.
+ * Lifts count as solid too, so a player standing on one rides it.
  */
 final class PlayerPhysics {
 
@@ -22,12 +24,15 @@ final class PlayerPhysics {
     private static final double JUMP_VELOCITY = -8;
     private static final double GRAVITY = 0.5;
 
-    private List<Wall> walls = List.of();
+    // Walls and lifts: everything a player can stand on or bump into.
+    private List<GameObject> solids = List.of();
     private Door door;
     private double levelWidth;
 
     void load(Level level) {
-        walls = level.getWalls();
+        List<GameObject> found = new ArrayList<>(level.getWalls());
+        found.addAll(level.getLifts());
+        solids = found;
         door = level.getDoor();
         levelWidth = level.getWidth();
     }
@@ -74,7 +79,7 @@ final class PlayerPhysics {
         double newX = player.getX() + player.getVelocityX();
         newX = Math.max(0, Math.min(newX, levelWidth - PLAYER_WIDTH));
 
-        for (Wall wall : walls) {
+        for (GameObject wall : solids) {
             if (wall.intersects(newX, player.getY(), PLAYER_WIDTH, PLAYER_HEIGHT)) {
                 if (player.getVelocityX() > 0) {
                     newX = wall.getPositionX() - PLAYER_WIDTH; // moving right -> stop at wall's left edge
@@ -101,7 +106,7 @@ final class PlayerPhysics {
         double newY = player.getY() + player.getVelocityY();
 
         boolean onGround = false;
-        for (Wall wall : walls) {
+        for (GameObject wall : solids) {
             if (wall.intersects(player.getX(), newY, PLAYER_WIDTH, PLAYER_HEIGHT)) {
                 if (player.getVelocityY() > 0) {
                     // falling -> land on top of the wall

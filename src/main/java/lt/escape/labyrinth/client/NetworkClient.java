@@ -12,6 +12,8 @@ import lt.escape.labyrinth.shared.DoorState;
 import lt.escape.labyrinth.shared.ButtonState;
 import lt.escape.labyrinth.shared.PressurePlateState;
 import lt.escape.labyrinth.shared.ExitState;
+import lt.escape.labyrinth.shared.LeverState;
+import lt.escape.labyrinth.shared.LiftState;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -94,6 +96,12 @@ public class NetworkClient {
             if (!doorOpenData.isEmpty()) {
                 gameState.updateDoorOpen(Boolean.parseBoolean(doorOpenData));
             }
+
+            gameState.updateLifts(parseLifts(sections));
+            String leverOnData = findSection(sections, "LEVER_ON:");
+            if (!leverOnData.isEmpty()) {
+                gameState.updateLeverOn(Boolean.parseBoolean(leverOnData));
+            }
         } catch (Exception e) {
             System.out.println("Invalid game state: " + message);
         }
@@ -116,6 +124,7 @@ public class NetworkClient {
             ExitState exit = parseExit(sections);
 
             gameState.updateLevelData(walls, tiles, door, button, pressurePlate, exit);
+            gameState.updateLever(parseLever(sections));
         } catch (Exception e) {
             System.out.println("Invalid level data: " + message);
         }
@@ -195,6 +204,33 @@ public class NetworkClient {
         return new ExitState(
                 Double.parseDouble(f[0]), Double.parseDouble(f[1]),
                 Double.parseDouble(f[2]), Double.parseDouble(f[3]));
+    }
+
+    private LeverState parseLever(String[] sections) {
+        String data = findSection(sections, "LEVER:");
+        if (data.isEmpty()) {
+            return null;
+        }
+        String[] f = data.split(",");
+        // Starts off; the per-tick LEVER_ON field updates this afterward.
+        return new LeverState(
+                Double.parseDouble(f[0]), Double.parseDouble(f[1]),
+                Double.parseDouble(f[2]), Double.parseDouble(f[3]), false);
+    }
+
+    private List<LiftState> parseLifts(String[] sections) {
+        List<LiftState> lifts = new ArrayList<>();
+        String data = findSection(sections, "LIFTS:");
+        if (data.isEmpty()) {
+            return lifts;
+        }
+        for (String entry : data.split(";")) {
+            String[] f = entry.split(",");
+            lifts.add(new LiftState(
+                    Double.parseDouble(f[0]), Double.parseDouble(f[1]),
+                    Double.parseDouble(f[2]), Double.parseDouble(f[3])));
+        }
+        return lifts;
     }
 
     /** Finds a "|"-delimited section by its prefix, instead of relying on a fixed index. */

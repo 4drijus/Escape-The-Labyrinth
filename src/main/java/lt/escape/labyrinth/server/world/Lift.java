@@ -1,5 +1,6 @@
 package lt.escape.labyrinth.server.world;
 
+import lt.escape.labyrinth.server.interactive.Mechanism;
 import lt.escape.labyrinth.shared.Prototype;
 
 /**
@@ -12,12 +13,17 @@ import lt.escape.labyrinth.shared.Prototype;
  * NOTE: this only moves the lift's own position. Making a PlayerState
  * ride along with it (detect standing on top, carry them each tick)
  * isn't implemented here -- that's a separate player-physics feature.
+ *
+ * Bridge: the lift is a Mechanism, so any Switch can start and stop it.
+ * It only moves while active. PlayerPhysics now treats lifts as solid,
+ * so a player standing on one rides it.
  */
-public class Lift extends GameObject implements MoveableObj, Prototype<Lift> {
+public class Lift extends GameObject implements MoveableObj, Prototype<Lift>, Mechanism {
     private final int movementRange;
     private final double startY;
     private boolean movingUp = true;
     private double speed = 40; // pixels per second; tune to taste
+    private boolean running = false;
 
     public Lift(double positionX, double positionY, double width, double height, int movementRange) {
         super(positionX, positionY, width, height);
@@ -35,6 +41,7 @@ public class Lift extends GameObject implements MoveableObj, Prototype<Lift> {
         this.startY = source.startY;
         this.movingUp = source.movingUp;
         this.speed = source.speed;
+        this.running = source.running;
     }
 
     @Override
@@ -42,7 +49,25 @@ public class Lift extends GameObject implements MoveableObj, Prototype<Lift> {
         return new Lift(this);
     }
 
+    @Override
+    public void activate() {
+        running = true;
+    }
+
+    @Override
+    public void deactivate() {
+        running = false;
+    }
+
+    @Override
+    public boolean isActive() {
+        return running;
+    }
+
     public void update(double deltaTime) {
+        if (!running) {
+            return; // stays where it is until a switch starts it
+        }
         double step = speed * deltaTime * (movingUp ? -1 : 1);
         positionY += step;
 

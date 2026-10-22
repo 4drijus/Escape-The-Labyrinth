@@ -29,6 +29,10 @@ public final class LevelLayout {
     private Area door;
     private Area button;
     private Area exit;
+    // Optional: a lift (resting position) and the lever that runs it. Null if the map has none.
+    private Area lift;
+    private int liftRange;
+    private Area lever;
 
     private final List<Wall> walls = new ArrayList<>();
     /** Floor-level (or platform-top) spots for spiky bushes. */
@@ -147,6 +151,13 @@ public final class LevelLayout {
         l.button = rect(350, 440, 30, 30);
         l.exit = rect(830, 440, 130, 80);
 
+        // Lift in the gap right of the ceiling: rides up to just above the
+        // ceiling's top (y=360), so players can step onto it. The lever on the
+        // floor next to it starts and stops the lift.
+        l.lift = rect(540, 505, 40, 15);
+        l.liftRange = 160;
+        l.lever = rect(505, 500, 20, 20);
+
         // Hazard slots
         l.groundSlots.add(rect(150, 440, 30, 30));    // Left platform
         l.groundSlots.add(rect(500, 440, 30, 30));    // Right platform
@@ -188,6 +199,20 @@ public final class LevelLayout {
 
     public Area getExit() {
         return exit;
+    }
+
+    /** Nullable -- only maps with a lift have one. */
+    public Area getLift() {
+        return lift;
+    }
+
+    public int getLiftRange() {
+        return liftRange;
+    }
+
+    /** Nullable -- set together with getLift(). */
+    public Area getLever() {
+        return lever;
     }
 
     public List<Wall> getWalls() {

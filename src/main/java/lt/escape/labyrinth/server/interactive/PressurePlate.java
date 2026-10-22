@@ -1,12 +1,14 @@
 package lt.escape.labyrinth.server.interactive;
 
-public abstract class PressurePlate extends InteractiveElement {
-    protected final Door door;
-    protected PressurePlate(Door door) {
-        this.door = java.util.Objects.requireNonNull(door);
+public abstract class PressurePlate extends Switch {
+    protected PressurePlate(Mechanism target) {
+        super(target);
     }
     public abstract void trigger();
     public abstract void release();
-    // Same as Button.copyFor(): the copy is linked to the copied door.
-    public abstract PressurePlate copyFor(Door door);
+    // Bridge: standing on the plate triggers it, stepping off releases it.
+    @Override public void onPlayerEnter() { trigger(); }
+    @Override public void onPlayerLeave() { release(); }
+    // Same as Button.copyFor(): the copy is linked to the copied mechanism.
+    @Override public abstract PressurePlate copyFor(Mechanism target);
 }

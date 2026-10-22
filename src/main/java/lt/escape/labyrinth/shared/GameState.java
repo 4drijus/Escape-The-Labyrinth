@@ -22,6 +22,9 @@ public class GameState {
     private ButtonState button;
     private PressurePlateState pressurePlate; // nullable -- not every level has one
     private ExitState exit; // nullable -- not every level has one
+    // Lifts move every tick; the lever's on/off flag too. Empty / null if the level has none.
+    private List<LiftState> lifts = new ArrayList<>();
+    private LeverState lever;
 
 
     private GameState() {
@@ -109,5 +112,21 @@ public class GameState {
 
     public void setExit(ExitState exit) {
         this.exit = exit;
+    }
+
+    public List<LiftState> getLifts() {
+        return lifts;
+    }
+
+    public void setLifts(List<LiftState> lifts) {
+        this.lifts = lifts;
+    }
+
+    public LeverState getLever() {
+        return lever;
+    }
+
+    public void setLever(LeverState lever) {
+        this.lever = lever;
     }
 }

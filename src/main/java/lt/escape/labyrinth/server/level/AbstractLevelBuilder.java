@@ -5,6 +5,8 @@ import lt.escape.labyrinth.server.interactive.Door;
 import lt.escape.labyrinth.server.interactive.Exit;
 import lt.escape.labyrinth.server.interactive.InteractiveElement;
 import lt.escape.labyrinth.server.interactive.InteractiveElementFactory;
+import lt.escape.labyrinth.server.interactive.Lever;
+import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.Wall;
 
 /**
@@ -70,6 +72,18 @@ public abstract class AbstractLevelBuilder implements ILevelBuilder {
         Button button = elementFactory.createButton(door);
         place(button, layout.getButton());
         level.setButton(button);
+
+        // Bridge: the same switch hierarchy drives a different Mechanism --
+        // here a Lever runs a Lift instead of a Door. Only maps with a lift.
+        LevelLayout.Area liftArea = layout.getLift();
+        if (liftArea != null) {
+            Lift lift = new Lift(liftArea.x(), liftArea.y(), liftArea.width(), liftArea.height(), layout.getLiftRange());
+            level.addLift(lift);
+
+            Lever lever = new Lever(lift);
+            place(lever, layout.getLever());
+            level.setLever(lever);
+        }
     }
 
     @Override
