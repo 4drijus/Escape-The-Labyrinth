@@ -75,6 +75,12 @@ public class GameWorld {
         physics.update(player2);
         enemies.update(players, DELTA_TIME_SECONDS);
         interactions.update(players, DELTA_TIME_SECONDS);
+
+        if (!player1.isAlive() || !player2.isAlive()) {
+            restartLevel(player1, player2);
+            return true;
+        }
+
         mirror.sync(enemies.getEnemies(), enemies.getBullets(), interactions.getDoor());
 
         // Last on purpose: this replaces everything the other steps just worked on.
@@ -111,6 +117,14 @@ public class GameWorld {
         Level next = levels.advance();
         System.out.println("Starting level " + levels.number());
         load(next);
+    }
+
+    /** A player died: rebuild the current level and restore both players' health. */
+    private void restartLevel(PlayerState player1, PlayerState player2) {
+        System.out.println("A player died -- restarting level " + levels.number());
+        player1.resetHealth();
+        player2.resetHealth();
+        load(levels.current());
     }
 
     /** Hands the new level to every subsystem. */
