@@ -75,6 +75,15 @@ final class InteractionSystem {
         return false;
     }
 
+    /**
+     * After a checkpoint load: a player already standing on the button or
+     * plate counts as already on it, so loading doesn't press it again.
+     */
+    void resumeSwitches(List<PlayerState> players) {
+        buttonTouched = button != null && anyPlayerOverlaps(players, button);
+        plateOccupied = pressurePlate != null && anyPlayerOverlaps(players, pressurePlate);
+    }
+
     Door getDoor() {
         return door;
     }

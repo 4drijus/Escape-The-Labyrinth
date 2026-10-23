@@ -8,6 +8,15 @@ public class InstaDeathTurret extends Turret {
         super(x, y, firingIntervalMs);
     }
 
+    private InstaDeathTurret(InstaDeathTurret source) {
+        super(source);
+    }
+
+    @Override
+    public InstaDeathTurret copy() {
+        return new InstaDeathTurret(this);
+    }
+
     @Override
     protected Bullet createBullet(double x, double y, double directionX, double directionY) {
         return new InstaDeathBullet(x, y, directionX, directionY);

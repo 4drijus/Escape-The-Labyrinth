@@ -9,6 +9,13 @@ public final class TimedDoor extends Door {
         }
         this.durationSeconds = durationSeconds;
     }
+    // Keeps the countdown, so a copy of an open door closes at the same time.
+    private TimedDoor(TimedDoor source) {
+        super(source);
+        durationSeconds = source.durationSeconds;
+        remainingSeconds = source.remainingSeconds;
+    }
+    @Override public TimedDoor copy() { return new TimedDoor(this); }
     @Override public void open() {
         super.open();
         remainingSeconds = durationSeconds;

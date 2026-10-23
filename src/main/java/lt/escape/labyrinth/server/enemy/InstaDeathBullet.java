@@ -11,6 +11,15 @@ public class InstaDeathBullet extends Bullet {
         super(x, y, directionX, directionY, SPEED);
     }
 
+    private InstaDeathBullet(InstaDeathBullet source) {
+        super(source);
+    }
+
+    @Override
+    public InstaDeathBullet copy() {
+        return new InstaDeathBullet(this);
+    }
+
     @Override
     public void onHit(PlayerState player) {
         player.setHealth(0);

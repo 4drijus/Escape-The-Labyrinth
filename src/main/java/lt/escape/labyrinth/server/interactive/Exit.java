@@ -2,6 +2,7 @@ package lt.escape.labyrinth.server.interactive;
 
 import lt.escape.labyrinth.server.GameConstants;
 import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.List;
 
@@ -13,9 +14,16 @@ import java.util.List;
  * The zone's position and size are the bounds inherited from
  * InteractiveElement (setBounds / getX / getY / getWidth / getHeight).
  */
-public class Exit extends InteractiveElement {
+public class Exit extends InteractiveElement implements Prototype<Exit> {
 
     private boolean gameEnded = false;
+
+    @Override
+    public Exit copy() {
+        Exit copy = copyBoundsTo(new Exit());
+        copy.gameEnded = gameEnded;
+        return copy;
+    }
 
     public boolean checkPlayerAmount(List<PlayerState> players) {
         for (PlayerState player : players) {

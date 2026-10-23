@@ -12,6 +12,7 @@ import lt.escape.labyrinth.server.world.Potion;
 import lt.escape.labyrinth.server.world.Sign;
 import lt.escape.labyrinth.server.world.Tile;
 import lt.escape.labyrinth.server.world.Wall;
+import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +27,7 @@ import java.util.List;
  * Door, Button, PressurePlate and Exit carry their own position (see
  * InteractiveElement.setBounds), so Level just holds the elements.
  */
-public class Level {
+public class Level implements Prototype<Level> {
 
     private double width = 960;
     private double height = 600;
@@ -187,5 +188,62 @@ public class Level {
     /** Nullable. */
     public Exit getExit() {
         return exit;
+    }
+
+    // ---- Prototype ----
+
+    /**
+     * Prototype: an independent copy of this level, so GameWorld can keep
+     * the level the Director built as an untouched template and restart
+     * from a copy of it instead of running the recipe again.
+     */
+    @Override
+    public Level copy() {
+        Level copy = new Level();
+        copy.setDimensions(width, height);
+        copy.setPlayerStarts(player1StartX, player1StartY, player2StartX, player2StartY);
+
+        // Parts that change during play get their own copies...
+        for (Enemy enemy : enemies) {
+            copy.addEnemy(enemy.copy());
+        }
+        for (Lift lift : lifts) {
+            copy.addLift(lift.copy());
+        }
+        for (Box box : boxes) {
+            copy.addBox(box.copy());
+        }
+        for (Potion potion : potions) {
+            copy.addPotion(potion.copy());
+        }
+        if (exit != null) {
+            copy.setExit(exit.copy());
+        }
+
+        // ...the switches are linked to the copied door, not this one...
+        Door doorCopy = door == null ? null : door.copy();
+        copy.setDoor(doorCopy);
+        if (button != null) {
+            copy.setButton(button.copyFor(doorCopy));
+        }
+        if (pressurePlate != null) {
+            copy.setPressurePlate(pressurePlate.copyFor(doorCopy));
+        }
+        if (lever != null) {
+            copy.setLever(lever.copyFor(doorCopy));
+        }
+
+        // ...and walls, tiles and signs never change, so both levels share them.
+        for (Wall wall : walls) {
+            copy.addWall(wall);
+        }
+        for (Tile tile : tiles) {
+            copy.addTile(tile);
+        }
+        for (Sign sign : signs) {
+            copy.addSign(sign);
+        }
+
+        return copy;
     }
 }

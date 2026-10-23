@@ -7,4 +7,6 @@ public abstract class PressurePlate extends InteractiveElement {
     }
     public abstract void trigger();
     public abstract void release();
+    // Same as Button.copyFor(): the copy is linked to the copied door.
+    public abstract PressurePlate copyFor(Door door);
 }

@@ -34,6 +34,17 @@ public class ZigZagBehavior implements Behavior {
     }
 
     @Override
+    public Behavior copy() {
+        ZigZagBehavior copy = new ZigZagBehavior(rangeX, amplitudeY, speed);
+        copy.startX = startX;
+        copy.startY = startY;
+        copy.initialized = initialized;
+        copy.movingRight = movingRight;
+        copy.movingDown = movingDown;
+        return copy;
+    }
+
+    @Override
     public void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime) {
         if (!initialized) {
             startX = enemy.getX();

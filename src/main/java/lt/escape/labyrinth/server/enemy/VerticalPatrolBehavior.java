@@ -28,6 +28,15 @@ public class VerticalPatrolBehavior implements Behavior {
     }
 
     @Override
+    public Behavior copy() {
+        VerticalPatrolBehavior copy = new VerticalPatrolBehavior(range, speed);
+        copy.startY = startY;
+        copy.initialized = initialized;
+        copy.movingUp = movingUp;
+        return copy;
+    }
+
+    @Override
     public void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime) {
         if (!initialized) {
             startY = enemy.getY();

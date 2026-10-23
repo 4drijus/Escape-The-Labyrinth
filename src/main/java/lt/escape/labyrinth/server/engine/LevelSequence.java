@@ -39,6 +39,12 @@ final class LevelSequence {
         return current();
     }
 
+    /** Moves to the given 1-based level and builds it -- used when a checkpoint from another level is loaded. */
+    Level jumpTo(int number) {
+        index = number - 1;
+        return current();
+    }
+
     /** 1-based, for messages. */
     int number() {
         return index + 1;

@@ -88,6 +88,11 @@ final class EnemySystem {
         }
     }
 
+    /** Puts saved bullets back in flight -- used when a checkpoint is loaded. */
+    void addBullets(List<Bullet> saved) {
+        bullets.addAll(saved);
+    }
+
     List<Enemy> getEnemies() {
         return Collections.unmodifiableList(enemies);
     }

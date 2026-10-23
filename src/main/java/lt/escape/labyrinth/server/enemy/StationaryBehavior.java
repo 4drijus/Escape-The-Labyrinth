@@ -11,4 +11,9 @@ public class StationaryBehavior implements Behavior {
     public void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime) {
         // Intentionally does nothing.
     }
+
+    @Override
+    public Behavior copy() {
+        return this;
+    }
 }

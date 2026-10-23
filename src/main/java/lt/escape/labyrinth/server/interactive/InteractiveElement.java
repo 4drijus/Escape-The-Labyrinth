@@ -15,6 +15,12 @@ public abstract class InteractiveElement {
     public double getWidth() { return width; }
     public double getHeight() { return height; }
 
+    // For copy()/copyFor(): gives the copy this element's position and size.
+    protected <T extends InteractiveElement> T copyBoundsTo(T copy) {
+        copy.setBounds(x, y, width, height);
+        return copy;
+    }
+
     public void update(double deltaSeconds) {
         if (!Double.isFinite(deltaSeconds) || deltaSeconds < 0) {
             throw new IllegalArgumentException("deltaSeconds must be finite and nonnegative");

@@ -23,6 +23,12 @@ public class ChaseBehavior implements Behavior {
         this.keepDistance = keepDistance;
     }
 
+    // Shallow on purpose: only final settings, nothing that changes while chasing.
+    @Override
+    public Behavior copy() {
+        return this;
+    }
+
     @Override
     public void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime) {
         PlayerState target = nearest(enemy, players);

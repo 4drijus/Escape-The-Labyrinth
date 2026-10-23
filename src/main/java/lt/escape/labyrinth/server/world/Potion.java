@@ -2,6 +2,7 @@ package lt.escape.labyrinth.server.world;
 
 import lt.escape.labyrinth.server.GameConstants;
 import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Prototype;
 
 /**
  * "Eleksyras – Naudojamas atgauti gyvybei" -- heals one life on contact.
@@ -12,11 +13,18 @@ import lt.escape.labyrinth.shared.PlayerState;
  * "walk over it, heal immediately, it's gone" version, which is what
  * actually fits "level building."
  */
-public class Potion extends GameObject {
+public class Potion extends GameObject implements Prototype<Potion> {
     private boolean collected = false;
 
     public Potion(double positionX, double positionY, double width, double height) {
         super(positionX, positionY, width, height);
+    }
+
+    @Override
+    public Potion copy() {
+        Potion copy = new Potion(positionX, positionY, width, height);
+        copy.collected = collected;
+        return copy;
     }
 
     public boolean isTouching(PlayerState player) {

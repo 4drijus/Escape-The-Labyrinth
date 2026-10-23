@@ -4,6 +4,7 @@ import lt.escape.labyrinth.server.GameConstants;
 import lt.escape.labyrinth.server.world.Wall;
 import lt.escape.labyrinth.shared.EnemyType;
 import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,8 +17,10 @@ import java.util.List;
  *  - directly, with setBehavior(), or
  *  - automatically, with setBehaviorRotation(): every N seconds the enemy
  *    switches to the next strategy in a list, looping forever.
+ *
+ * Each concrete enemy implements copy()
  */
-public abstract class Enemy {
+public abstract class Enemy implements Prototype<Enemy> {
 
     protected double x;
     protected double y;
@@ -33,6 +36,29 @@ public abstract class Enemy {
         this.x = x;
         this.y = y;
         this.behavior = behavior;
+    }
+
+    /**
+     * Copy constructor for copy(). The behaviors are copied too, not shared,
+     * and the copy carries on from the same point in its rotation.
+     */
+    protected Enemy(Enemy source) {
+        this.x = source.x;
+        this.y = source.y;
+        this.rotation = source.rotation.stream().map(Behavior::copy).toList();
+        this.rotationIntervalSeconds = source.rotationIntervalSeconds;
+        this.rotationTimer = source.rotationTimer;
+        this.rotationIndex = source.rotationIndex;
+
+        // The active behavior is normally the rotation's current one -- point at
+        // that copy instead of making a second, separate copy of it.
+        boolean activeIsInRotation = !source.rotation.isEmpty()
+                && source.behavior == source.rotation.get(source.rotationIndex);
+        if (activeIsInRotation) {
+            this.behavior = rotation.get(rotationIndex);
+        } else {
+            this.behavior = source.behavior == null ? null : source.behavior.copy();
+        }
     }
 
     public abstract EnemyType getType();

@@ -1,6 +1,6 @@
 package lt.escape.labyrinth.shared;
 
-public class PlayerState {
+public class PlayerState implements Prototype<PlayerState> {
     private final int playerId;
 
     private double x;
@@ -94,6 +94,30 @@ public class PlayerState {
 
     public boolean isAlive() {
         return health > 0;
+    }
+
+    @Override
+    public PlayerState copy() {
+        PlayerState copy = new PlayerState(playerId, x, y);
+        copy.velocityX = velocityX;
+        copy.velocityY = velocityY;
+        copy.onGround = onGround;
+        copy.health = health;
+        copy.invulnerableUntil = invulnerableUntil;
+        return copy;
+    }
+
+    /**
+     * Loads a checkpoint into this player. velocityX is kept: it follows the
+     * keys held right now, not the ones held when the checkpoint was saved.
+     */
+    public void restoreFrom(PlayerState saved) {
+        this.x = saved.x;
+        this.y = saved.y;
+        this.velocityY = saved.velocityY;
+        this.onGround = saved.onGround;
+        this.health = saved.health;
+        this.invulnerableUntil = saved.invulnerableUntil;
     }
 
 }
