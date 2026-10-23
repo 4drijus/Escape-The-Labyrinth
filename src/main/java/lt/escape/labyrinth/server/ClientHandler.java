@@ -189,6 +189,10 @@ public class ClientHandler implements Runnable {
                     .append(bullet.getY());
         }
 
+        message.append("|HEALTH:")
+                .append(player1.getHealth()).append(",")
+                .append(player2.getHealth());
+
         message.append("|DOOR_OPEN:");
         DoorState door = gameState.getDoor();
         message.append(door != null && door.isOpen());

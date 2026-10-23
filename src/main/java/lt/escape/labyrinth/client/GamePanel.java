@@ -150,6 +150,16 @@ public class GamePanel extends JPanel implements IObserver {
                 g, 1, Assets.getPlayerRedSprite(),
                 state.getPlayer2X(), state.getPlayer2Y()
         );
+        drawHealth(g, "P1", state.getPlayer1Health(), 10, new Color(80, 140, 255));
+        drawHealth(g, "P2", state.getPlayer2Health(), getWidth() - 110, new Color(255, 90, 90));
+    }
+
+    private void drawHealth(Graphics g, String label, int health, int x, Color color) {
+        g.setColor(color);
+        g.drawString(label, x, 20);
+        for (int i = 0; i < health; i++) {
+            g.fillRect(x + 25 + i * 20, 8, 14, 14);
+        }
     }
 
     private void drawPlayer(

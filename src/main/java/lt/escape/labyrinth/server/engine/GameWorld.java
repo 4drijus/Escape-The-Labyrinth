@@ -102,12 +102,13 @@ public class GameWorld {
         physics.update(player2);
         enemies.update(players, DELTA_TIME_SECONDS);
         interactions.update(players, DELTA_TIME_SECONDS);
-        mirror.sync(enemies.getEnemies(), enemies.getBullets(), interactions.getDoor());
 
         if (!player1.isAlive() || !player2.isAlive()) {
-            restartLevel(); // same level again, so the layout the clients have is still right
-            return layoutChanged;
+            restartLevel(player1, player2);
+            return true;
         }
+
+        mirror.sync(enemies.getEnemies(), enemies.getBullets(), interactions.getDoor());
 
         // Last on purpose: this replaces everything the other steps just worked on.
         if (interactions.isExitReached(players)) {
@@ -157,14 +158,6 @@ public class GameWorld {
         load(levelTemplate.copy());
     }
 
-    private void restartLevel() {
-        System.out.println("A player died -- restarting level " + levels.number());
-        Level fresh = levelTemplate.copy();
-        load(fresh);
-        state.getPlayer1().respawn(fresh.getPlayer1StartX(), fresh.getPlayer1StartY()); // full health again
-        state.getPlayer2().respawn(fresh.getPlayer2StartX(), fresh.getPlayer2StartY());
-    }
-
     private void saveCheckpoint() {
         checkpoint = new Checkpoint(levels.number(), currentLevel,
                 state.getPlayer1(), state.getPlayer2(), enemies.getBullets()).copy();
@@ -188,6 +181,17 @@ public class GameWorld {
         interactions.resumeSwitches(List.of(state.getPlayer1(), state.getPlayer2()));
         System.out.println("Checkpoint loaded");
         return true;
+    }
+
+    /**
+     * A player died: rebuild the current level and restore both players' health.
+     * Prototype: the level is a fresh copy of the untouched template, not built again.
+     */
+    private void restartLevel(PlayerState player1, PlayerState player2) {
+        System.out.println("A player died -- restarting level " + levels.number());
+        player1.resetHealth();
+        player2.resetHealth();
+        load(levelTemplate.copy());
     }
 
     /** Hands the new level to every subsystem. */
