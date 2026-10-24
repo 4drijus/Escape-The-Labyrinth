@@ -1,5 +1,9 @@
 package lt.escape.labyrinth.server.engine;
 
+import java.util.List;
+
+import static lt.escape.labyrinth.server.GameConstants.PLAYER_HEIGHT;
+import static lt.escape.labyrinth.server.GameConstants.PLAYER_WIDTH;
 import lt.escape.labyrinth.server.interactive.Button;
 import lt.escape.labyrinth.server.interactive.Door;
 import lt.escape.labyrinth.server.interactive.Exit;
@@ -10,11 +14,6 @@ import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.Potion;
 import lt.escape.labyrinth.server.world.Tile;
 import lt.escape.labyrinth.shared.PlayerState;
-
-import java.util.List;
-
-import static lt.escape.labyrinth.server.GameConstants.PLAYER_HEIGHT;
-import static lt.escape.labyrinth.server.GameConstants.PLAYER_WIDTH;
 
 /**
  * SUBSYSTEM: everything a player can touch that isn't dangerous. Puddles,

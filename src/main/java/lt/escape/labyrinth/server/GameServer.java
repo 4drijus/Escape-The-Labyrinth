@@ -1,13 +1,13 @@
 package lt.escape.labyrinth.server;
 
-import lt.escape.labyrinth.server.engine.GameWorld;
-import lt.escape.labyrinth.server.interactive.*;
-import lt.escape.labyrinth.server.level.*;
-import lt.escape.labyrinth.shared.GameState;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import lt.escape.labyrinth.server.engine.GameWorld;
+import lt.escape.labyrinth.server.interactive.InteractiveElementFactory;
+import lt.escape.labyrinth.server.interactive.NormalElementFactory;
+import lt.escape.labyrinth.shared.GameState;
 
 public class GameServer {
     private static final int PORT = 5000;
@@ -21,7 +21,7 @@ public class GameServer {
         System.out.println("Starting the server");
 
         // Swap NormalElementFactory for TimedElementFactory to get timed doors/buttons in every level.
-        InteractiveElementFactory elementFactory = new NormalElementFactory();
+        InteractiveElementFactory elementFactory = new NormalElementFactory(); //new TimedElementFactory()
 
         world = new GameWorld(GameState.getInstance(), elementFactory);
         world.start();
