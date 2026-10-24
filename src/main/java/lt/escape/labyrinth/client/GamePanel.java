@@ -4,11 +4,13 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import lt.escape.labyrinth.client.effects.BasicPlayerRenderer;
 import lt.escape.labyrinth.client.effects.JumpEffect;
+import lt.escape.labyrinth.client.effects.NameEffect;
 import lt.escape.labyrinth.client.effects.PlayerRenderer;
 import lt.escape.labyrinth.client.effects.RunEffect;
 import lt.escape.labyrinth.client.effects.TrailEffect;
@@ -17,6 +19,7 @@ import lt.escape.labyrinth.shared.ButtonState;
 import lt.escape.labyrinth.shared.DoorState;
 import lt.escape.labyrinth.shared.EnemyState;
 import lt.escape.labyrinth.shared.ExitState;
+import lt.escape.labyrinth.shared.PlayerCommand;
 import lt.escape.labyrinth.shared.PressurePlateState;
 import lt.escape.labyrinth.shared.TileState;
 import lt.escape.labyrinth.shared.WallState;
@@ -26,16 +29,21 @@ public class GamePanel extends JPanel implements IObserver {
     private final NetworkClient networkClient;
     private final InputHandler inputHandler;
     private final Timer gameTimer;
-    
-// Three decoration layers around the basic renderer.
-    private final PlayerRenderer playerRenderer
-            = new TrailEffect(
-                    new JumpEffect(
-                            new RunEffect(
-                                    new BasicPlayerRenderer()
-                            )
-                    )
-            );
+
+    private final PlayerRenderer[] playerRenderers = {
+        createPlayerRenderer(),
+        createPlayerRenderer()
+    };
+
+    private static PlayerRenderer createPlayerRenderer() {
+        return new TrailEffect(
+                new JumpEffect(
+                        new RunEffect(
+                                new BasicPlayerRenderer()
+                        )
+                )
+        );
+    }
 
 // Movement tracking for the two players.
     private final double[] previousX = new double[2];
@@ -49,9 +57,12 @@ public class GamePanel extends JPanel implements IObserver {
 
     public GamePanel(NetworkClient networkClient) {
         this.networkClient = networkClient;
-        setBackground(new Color(90, 88, 71));
+        setBackground(Color.DARK_GRAY);
 
-        inputHandler = new InputHandler(networkClient);
+        inputHandler = new InputHandler(
+                networkClient,
+                this::editPlayerName
+        );
         addKeyListener(inputHandler);
         setFocusable(true);
 
@@ -187,9 +198,64 @@ public class GamePanel extends JPanel implements IObserver {
         boolean jumping = lastVerticalMove[index] != 0
                 && now - lastVerticalMove[index] < EFFECT_HOLD_NANOS;
 
-        playerRenderer.draw(
+        playerRenderers[index].draw(
                 g, sprite, (int) x, (int) y, moving, jumping
         );
+    }
+
+    private void editPlayerName() {
+        System.out.println(
+                "N action, playerId = " + networkClient.getPlayerId()
+        );
+        int index = networkClient.getPlayerId() - 1;
+
+        if (index < 0 || index >= playerRenderers.length) {
+            return;
+        }
+
+        // stop movement before the dialog takes keyboard focus.
+        networkClient.sendCommand(PlayerCommand.STOP);
+
+        String enteredName = JOptionPane.showInputDialog(
+                this,
+                "Enter your name. Leave empty to remove it:",
+                "Player name",
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        requestFocusInWindow();
+
+        // cancel keeps the current renderer unchanged.
+        if (enteredName == null) {
+            return;
+        }
+
+        String name = enteredName.strip();
+
+        if (name.length() > 20) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "The name must contain no more than 20 characters."
+            );
+            requestFocusInWindow();
+            return;
+        }
+
+        PlayerRenderer current = playerRenderers[index];
+
+        // remove the previous name layer before replacing it.
+        if (current instanceof NameEffect nameEffect) {
+            current = nameEffect.unwrap();
+        }
+
+        if (name.isEmpty()) {
+            playerRenderers[index] = current;
+        } else {
+            // add a new decorator object at runtime.
+            playerRenderers[index] = new NameEffect(current, name);
+        }
+
+        repaint();
     }
 
     private Color colorFor(TileState tile) {
