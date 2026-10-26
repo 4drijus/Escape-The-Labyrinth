@@ -92,6 +92,12 @@ public class NetworkClient {
             gameState.updateEnemies(parseEnemies(sections));
             gameState.updateBullets(parseBullets(sections));
 
+            String healthData = findSection(sections, "HEALTH:");
+            if (!healthData.isEmpty()) {
+                String[] h = healthData.split(",");
+                gameState.updateHealth(Integer.parseInt(h[0]), Integer.parseInt(h[1]));
+            }
+
             String doorOpenData = findSection(sections, "DOOR_OPEN:");
             if (!doorOpenData.isEmpty()) {
                 gameState.updateDoorOpen(Boolean.parseBoolean(doorOpenData));

@@ -20,6 +20,8 @@ public class ClientGameState extends ISubject {
     private double player2X;
     private double player2Y;
 
+    private int player1Health = 3;
+    private int player2Health = 3;
     private List<EnemyState> enemies = List.of();
     private List<BulletState> bullets = List.of();
 
@@ -104,6 +106,20 @@ public class ClientGameState extends ISubject {
     public synchronized void updateLifts(List<LiftState> lifts) {
         this.lifts = lifts;
         notifyObservers();
+    }
+
+    public synchronized void updateHealth(int player1Health, int player2Health) {
+        this.player1Health = player1Health;
+        this.player2Health = player2Health;
+        notifyObservers();
+    }
+
+    public synchronized int getPlayer1Health() {
+        return player1Health;
+    }
+
+    public synchronized int getPlayer2Health() {
+        return player2Health;
     }
 
     public synchronized double getPlayer1X() {

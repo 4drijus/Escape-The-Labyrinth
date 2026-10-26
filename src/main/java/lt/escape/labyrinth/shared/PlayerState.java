@@ -12,7 +12,10 @@ public class PlayerState implements Prototype<PlayerState> {
 
     private int health;
 
+    private long invulnerableUntil;
+
     private static final int STARTING_HEALTH = 3;
+    private static final long INVULNERABILITY_MS = 1000;
 
     public PlayerState(int playerId, double x, double y) {
         this.playerId = playerId;
@@ -74,22 +77,23 @@ public class PlayerState implements Prototype<PlayerState> {
         this.health = health;
     }
 
+    /** Ignored while the player is still invulnerable from a previous hit. */
     public void takeDamage(int amount) {
+        long now = System.currentTimeMillis();
+        if (now < invulnerableUntil) {
+            return;
+        }
         this.health = Math.max(0, this.health - amount);
+        this.invulnerableUntil = now + INVULNERABILITY_MS;
+    }
+
+    public void resetHealth() {
+        this.health = STARTING_HEALTH;
+        this.invulnerableUntil = 0;
     }
 
     public boolean isAlive() {
         return health > 0;
-    }
-
-    /** Back to full health, standing still at (x, y) -- used when a level (re)starts. */
-    public void respawn(double x, double y) {
-        this.x = x;
-        this.y = y;
-        this.velocityX = 0;
-        this.velocityY = 0;
-        this.onGround = true;
-        this.health = STARTING_HEALTH;
     }
 
     @Override
@@ -99,6 +103,7 @@ public class PlayerState implements Prototype<PlayerState> {
         copy.velocityY = velocityY;
         copy.onGround = onGround;
         copy.health = health;
+        copy.invulnerableUntil = invulnerableUntil;
         return copy;
     }
 
@@ -112,6 +117,7 @@ public class PlayerState implements Prototype<PlayerState> {
         this.velocityY = saved.velocityY;
         this.onGround = saved.onGround;
         this.health = saved.health;
+        this.invulnerableUntil = saved.invulnerableUntil;
     }
 
 }

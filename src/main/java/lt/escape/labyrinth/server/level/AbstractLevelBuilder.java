@@ -6,13 +6,14 @@ import lt.escape.labyrinth.server.interactive.Exit;
 import lt.escape.labyrinth.server.interactive.InteractiveElement;
 import lt.escape.labyrinth.server.interactive.InteractiveElementFactory;
 import lt.escape.labyrinth.server.interactive.Lever;
+import lt.escape.labyrinth.server.interactive.PressurePlate;
 import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.Wall;
 
 /**
  * Shared part of every concrete builder. It builds everything that does NOT
- * depend on difficulty straight from the LevelLayout (map size, spawns,
- * walls, door, button, exit). The two steps that DO depend on difficulty --
+ * depend on difficulty straight from the LevelLayout (map size, spawns, walls,
+ * door, button, exit). The two steps that DO depend on difficulty --
  * buildTiles() and buildEnemies() -- are left abstract for
  * Easy/Medium/HardLevelBuilder to fill in.
  */
@@ -43,7 +44,6 @@ public abstract class AbstractLevelBuilder implements ILevelBuilder {
     }
 
     // ---- difficulty-independent steps ----
-
     @Override
     public void buildDimensions() {
         level.setDimensions(960, 600);
@@ -73,6 +73,16 @@ public abstract class AbstractLevelBuilder implements ILevelBuilder {
         place(button, layout.getButton());
         level.setButton(button);
 
+        LevelLayout.Area plateArea = layout.getPressurePlate();
+
+        if (plateArea != null) {
+            PressurePlate plate
+                    = elementFactory.createPressurePlate(door);
+
+            place(plate, plateArea);
+            level.setPressurePlate(plate);
+        }
+
         // Bridge: the same switch hierarchy drives a different Mechanism --
         // here a Lever runs a Lift instead of a Door. Only maps with a lift.
         LevelLayout.Area liftArea = layout.getLift();
@@ -93,13 +103,15 @@ public abstract class AbstractLevelBuilder implements ILevelBuilder {
         level.setExit(exit);
     }
 
-    /** The factories create elements without a position; the builder gives each one its bounds. */
+    /**
+     * The factories create elements without a position; the builder gives each
+     * one its bounds.
+     */
     private static void place(InteractiveElement element, LevelLayout.Area area) {
         element.setBounds(area.x(), area.y(), area.width(), area.height());
     }
 
     // ---- difficulty-dependent steps: each concrete builder decides ----
-
     @Override
     public abstract void buildTiles();
 

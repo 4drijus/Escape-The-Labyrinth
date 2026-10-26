@@ -60,7 +60,9 @@ final class InteractionSystem {
         applyTileEffects(players);
         collectPotions(players);
         for (Lift lift : lifts) {
+            double oldTop = lift.getPositionY();
             lift.update(deltaTime);
+            carryRiders(lift, oldTop, players);
         }
         checkSwitches(players);
 
@@ -102,6 +104,26 @@ final class InteractionSystem {
                 if (tile.isTouching(player)) {
                     tile.onPlayerContact(player);
                 }
+            }
+        }
+    }
+
+    /**
+     * Players standing on a lift move with it. Otherwise a rising lift sinks
+     * into its rider every tick, and PlayerPhysics pushes them off sideways
+     * as soon as they try to walk.
+     */
+    private void carryRiders(Lift lift, double oldTop, List<PlayerState> players) {
+        double dy = lift.getPositionY() - oldTop;
+        if (dy == 0) {
+            return;
+        }
+        for (PlayerState player : players) {
+            boolean standingOnIt = Math.abs(player.getY() + PLAYER_HEIGHT - oldTop) < 1
+                    && player.getX() < lift.getPositionX() + lift.getWidth()
+                    && player.getX() + PLAYER_WIDTH > lift.getPositionX();
+            if (standingOnIt) {
+                player.setY(player.getY() + dy);
             }
         }
     }
