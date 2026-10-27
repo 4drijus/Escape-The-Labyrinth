@@ -1,59 +1,68 @@
 package lt.escape.labyrinth.server.engine;
 
-import java.util.List;
-
-import static lt.escape.labyrinth.server.GameConstants.PLAYER_HEIGHT;
-import static lt.escape.labyrinth.server.GameConstants.PLAYER_WIDTH;
-import lt.escape.labyrinth.server.interactive.Button;
 import lt.escape.labyrinth.server.interactive.Door;
 import lt.escape.labyrinth.server.interactive.Exit;
 import lt.escape.labyrinth.server.interactive.InteractiveElement;
-import lt.escape.labyrinth.server.interactive.PressurePlate;
+import lt.escape.labyrinth.server.interactive.Switch;
 import lt.escape.labyrinth.server.level.Level;
 import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.Potion;
 import lt.escape.labyrinth.server.world.Tile;
 import lt.escape.labyrinth.shared.PlayerState;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static lt.escape.labyrinth.server.GameConstants.PLAYER_HEIGHT;
+import static lt.escape.labyrinth.server.GameConstants.PLAYER_WIDTH;
+
 /**
  * SUBSYSTEM: everything a player can touch that isn't dangerous. Puddles,
  * potions, lifts, the button and pressure plate, the door they open, and the
  * exit that ends the level.
+ *
+ * It is also the Bridge's client: it treats the button, pressure plate and
+ * lever alike as Switches, without knowing what Mechanism each one operates.
  */
 final class InteractionSystem {
 
     private Door door;
-    private Button button;
-    private PressurePlate pressurePlate;
     private Exit exit;
+    private List<Switch> switches = List.of();
 
     private List<Tile> tiles = List.of();
     private List<Lift> lifts = List.of();
     private List<Potion> potions = List.of();
 
-    // Edge detection, so press()/trigger()/release() fire once per step on/off, not every tick.
-    private boolean buttonTouched;
-    private boolean plateOccupied;
+    // Edge detection, so onPlayerEnter()/onPlayerLeave() fire once per step on/off, not every tick.
+    // occupied[i] belongs to switches.get(i).
+    private boolean[] occupied = new boolean[0];
 
     void load(Level level) {
         door = level.getDoor();
-        button = level.getButton();
-        pressurePlate = level.getPressurePlate();
         exit = level.getExit();
+
+        List<Switch> found = new ArrayList<>();
+        for (Switch sw : new Switch[] {level.getButton(), level.getPressurePlate(), level.getLever()}) {
+            if (sw != null) {
+                found.add(sw);
+            }
+        }
+        switches = found;
+        occupied = new boolean[switches.size()];
 
         tiles = level.getTiles();
         lifts = level.getLifts();
         potions = level.getPotions();
-
-        buttonTouched = false;
-        plateOccupied = false;
     }
 
     void update(List<PlayerState> players, double deltaTime) {
         applyTileEffects(players);
         collectPotions(players);
         for (Lift lift : lifts) {
+            double oldTop = lift.getPositionY();
             lift.update(deltaTime);
+            carryRiders(lift, oldTop, players);
         }
         checkSwitches(players);
 
@@ -79,8 +88,9 @@ final class InteractionSystem {
      * plate counts as already on it, so loading doesn't press it again.
      */
     void resumeSwitches(List<PlayerState> players) {
-        buttonTouched = button != null && anyPlayerOverlaps(players, button);
-        plateOccupied = pressurePlate != null && anyPlayerOverlaps(players, pressurePlate);
+        for (int i = 0; i < switches.size(); i++) {
+            occupied[i] = anyPlayerOverlaps(players, switches.get(i));
+        }
     }
 
     Door getDoor() {
@@ -98,6 +108,26 @@ final class InteractionSystem {
         }
     }
 
+    /**
+     * Players standing on a lift move with it. Otherwise a rising lift sinks
+     * into its rider every tick, and PlayerPhysics pushes them off sideways
+     * as soon as they try to walk.
+     */
+    private void carryRiders(Lift lift, double oldTop, List<PlayerState> players) {
+        double dy = lift.getPositionY() - oldTop;
+        if (dy == 0) {
+            return;
+        }
+        for (PlayerState player : players) {
+            boolean standingOnIt = Math.abs(player.getY() + PLAYER_HEIGHT - oldTop) < 1
+                    && player.getX() < lift.getPositionX() + lift.getWidth()
+                    && player.getX() + PLAYER_WIDTH > lift.getPositionX();
+            if (standingOnIt) {
+                player.setY(player.getY() + dy);
+            }
+        }
+    }
+
     private void collectPotions(List<PlayerState> players) {
         for (Potion potion : potions) {
             for (PlayerState player : players) {
@@ -111,24 +141,20 @@ final class InteractionSystem {
     /**
      * Touching the button presses it once; stepping on the pressure plate
      * triggers it, stepping off releases it.
+     *
+     * Each switch decides what entering/leaving means (Button presses, Lever
+     * pulls ...) and passes it on to whatever Mechanism it holds.
      */
     private void checkSwitches(List<PlayerState> players) {
-        if (button != null) {
-            boolean touched = anyPlayerOverlaps(players, button);
-            if (touched && !buttonTouched) {
-                button.press();
+        for (int i = 0; i < switches.size(); i++) {
+            Switch sw = switches.get(i);
+            boolean nowOccupied = anyPlayerOverlaps(players, sw);
+            if (nowOccupied && !occupied[i]) {
+                sw.onPlayerEnter();
+            } else if (!nowOccupied && occupied[i]) {
+                sw.onPlayerLeave();
             }
-            buttonTouched = touched;
-        }
-
-        if (pressurePlate != null) {
-            boolean occupied = anyPlayerOverlaps(players, pressurePlate);
-            if (occupied && !plateOccupied) {
-                pressurePlate.trigger();
-            } else if (!occupied && plateOccupied) {
-                pressurePlate.release();
-            }
-            plateOccupied = occupied;
+            occupied[i] = nowOccupied;
         }
     }
 

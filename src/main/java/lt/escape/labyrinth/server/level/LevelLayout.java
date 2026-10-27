@@ -33,6 +33,10 @@ public final class LevelLayout {
     private Area button;
     private Area pressurePlate;
     private Area exit;
+    // Optional: a lift (resting position) and the lever that runs it. Null if the map has none.
+    private Area lift;
+    private int liftRange;
+    private Area lever;
 
     private final List<Wall> walls = new ArrayList<>();
     /**
@@ -87,6 +91,7 @@ public final class LevelLayout {
     /**
      * A stepped hill; the button sits on the plateau, so someone has to climb
      * it.
+     * A lever on the last step runs a lift by the door -- the way over it to the button.
      */
     public static LevelLayout hill() {
         LevelLayout l = new LevelLayout();
@@ -103,6 +108,13 @@ public final class LevelLayout {
         // Button far enough behind the door to avoid closing it on the player
         l.button = rect(880, 490, 25, 30);
         l.exit = rect(830, 440, 130, 80);
+
+        // Lift right in front of the door: rides up to y=400, above the door's
+        // top (y=420), so a player can step over the closed door. The lever on
+        // the last step down starts and stops it.
+        l.lift = rect(742, 505, 36, 15);
+        l.liftRange = 105;
+        l.lever = rect(590, 450, 20, 20);
 
         l.groundSlots.add(rect(710, 490, 30, 30));
         l.groundSlots.add(rect(440, 340, 30, 30));   // on the plateau
@@ -237,6 +249,20 @@ public final class LevelLayout {
 
     public Area getExit() {
         return exit;
+    }
+
+    /** Nullable -- only maps with a lift have one. */
+    public Area getLift() {
+        return lift;
+    }
+
+    public int getLiftRange() {
+        return liftRange;
+    }
+
+    /** Nullable -- set together with getLift(). */
+    public Area getLever() {
+        return lever;
     }
 
     public List<Wall> getWalls() {

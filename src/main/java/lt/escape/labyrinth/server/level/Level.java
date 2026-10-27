@@ -5,7 +5,9 @@ import lt.escape.labyrinth.server.interactive.Button;
 import lt.escape.labyrinth.server.interactive.Door;
 import lt.escape.labyrinth.server.interactive.Exit;
 import lt.escape.labyrinth.server.interactive.Lever;
+import lt.escape.labyrinth.server.interactive.Mechanism;
 import lt.escape.labyrinth.server.interactive.PressurePlate;
+import lt.escape.labyrinth.server.interactive.Switch;
 import lt.escape.labyrinth.server.world.Box;
 import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.Potion;
@@ -16,7 +18,9 @@ import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Builder pattern "product". It has no constructor of its own: a builder
@@ -203,12 +207,16 @@ public class Level implements Prototype<Level> {
         copy.setDimensions(width, height);
         copy.setPlayerStarts(player1StartX, player1StartY, player2StartX, player2StartY);
 
-        // Parts that change during play get their own copies...
+        // Parts that change during play get their own copies. For the
+        // mechanisms (door, lifts) remember which copy belongs to which original...
+        Map<Mechanism, Mechanism> copiedMechanisms = new IdentityHashMap<>();
         for (Enemy enemy : enemies) {
             copy.addEnemy(enemy.copy());
         }
         for (Lift lift : lifts) {
-            copy.addLift(lift.copy());
+            Lift liftCopy = lift.copy();
+            copiedMechanisms.put(lift, liftCopy);
+            copy.addLift(liftCopy);
         }
         for (Box box : boxes) {
             copy.addBox(box.copy());
@@ -219,18 +227,21 @@ public class Level implements Prototype<Level> {
         if (exit != null) {
             copy.setExit(exit.copy());
         }
+        if (door != null) {
+            Door doorCopy = door.copy();
+            copiedMechanisms.put(door, doorCopy);
+            copy.setDoor(doorCopy);
+        }
 
-        // ...the switches are linked to the copied door, not this one...
-        Door doorCopy = door == null ? null : door.copy();
-        copy.setDoor(doorCopy);
+        // ...so each switch is linked to the copy of what it operates, not the original...
         if (button != null) {
-            copy.setButton(button.copyFor(doorCopy));
+            copy.setButton(button.copyFor(copiedTarget(button, copiedMechanisms)));
         }
         if (pressurePlate != null) {
-            copy.setPressurePlate(pressurePlate.copyFor(doorCopy));
+            copy.setPressurePlate(pressurePlate.copyFor(copiedTarget(pressurePlate, copiedMechanisms)));
         }
         if (lever != null) {
-            copy.setLever(lever.copyFor(doorCopy));
+            copy.setLever(lever.copyFor(copiedTarget(lever, copiedMechanisms)));
         }
 
         // ...and walls, tiles and signs never change, so both levels share them.
@@ -245,5 +256,15 @@ public class Level implements Prototype<Level> {
         }
 
         return copy;
+    }
+
+    /** The copy of the mechanism a switch operates. A switch must operate something in this level. */
+    private static Mechanism copiedTarget(Switch sw, Map<Mechanism, Mechanism> copiedMechanisms) {
+        Mechanism target = copiedMechanisms.get(sw.getTarget());
+        if (target == null) {
+            throw new IllegalStateException(
+                    sw.getClass().getSimpleName() + " operates a mechanism that isn't part of this level");
+        }
+        return target;
     }
 }

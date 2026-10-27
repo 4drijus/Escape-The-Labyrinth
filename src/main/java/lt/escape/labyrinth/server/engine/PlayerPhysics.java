@@ -8,8 +8,10 @@ import static lt.escape.labyrinth.server.GameConstants.PLAYER_HEIGHT;
 import static lt.escape.labyrinth.server.GameConstants.PLAYER_WIDTH;
 import lt.escape.labyrinth.server.collision.CollisionObstacle;
 import lt.escape.labyrinth.server.collision.DoorCollisionAdapter;
+import lt.escape.labyrinth.server.collision.LiftCollisionAdapter;
 import lt.escape.labyrinth.server.collision.WallCollisionAdapter;
 import lt.escape.labyrinth.server.level.Level;
+import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.Wall;
 import lt.escape.labyrinth.shared.PlayerCommand;
 import lt.escape.labyrinth.shared.PlayerState;
@@ -18,6 +20,7 @@ import lt.escape.labyrinth.shared.PlayerState;
  * SUBSYSTEM: how players move. Turns commands into velocities, applies gravity,
  * and resolves collisions. Walls and closed doors block movement through a
  * common CollisionObstacle interface.
+ * Lifts count as solid too, so a player standing on one rides it.
  */
 final class PlayerPhysics {
 
@@ -33,6 +36,10 @@ final class PlayerPhysics {
 
         for (Wall wall : level.getWalls()) {
             loaded.add(new WallCollisionAdapter(wall));
+        }
+
+        for (Lift lift : level.getLifts()) {
+            loaded.add(new LiftCollisionAdapter(lift));
         }
 
         if (level.getDoor() != null) {

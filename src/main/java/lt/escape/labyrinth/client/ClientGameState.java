@@ -5,6 +5,8 @@ import lt.escape.labyrinth.shared.ButtonState;
 import lt.escape.labyrinth.shared.DoorState;
 import lt.escape.labyrinth.shared.EnemyState;
 import lt.escape.labyrinth.shared.ExitState;
+import lt.escape.labyrinth.shared.LeverState;
+import lt.escape.labyrinth.shared.LiftState;
 import lt.escape.labyrinth.shared.PressurePlateState;
 import lt.escape.labyrinth.shared.TileState;
 import lt.escape.labyrinth.shared.WallState;
@@ -30,6 +32,8 @@ public class ClientGameState extends ISubject {
     private ButtonState button;
     private PressurePlateState pressurePlate;
     private ExitState exit;
+    private LeverState lever; // nullable -- arrives with LEVEL:, on/off every tick
+    private List<LiftState> lifts = List.of(); // positions arrive every tick
 
     public synchronized void update(
             double player1X,
@@ -82,6 +86,26 @@ public class ClientGameState extends ISubject {
             door.setOpen(open);
             notifyObservers();
         }
+    }
+
+    /** Called with the LEVEL: message; null if the level has no lever. */
+    public synchronized void updateLever(LeverState lever) {
+        this.lever = lever;
+        notifyObservers();
+    }
+
+    /** Called every tick, like updateDoorOpen(). */
+    public synchronized void updateLeverOn(boolean on) {
+        if (lever != null) {
+            lever.setOn(on);
+            notifyObservers();
+        }
+    }
+
+    /** Called every tick -- lifts move. */
+    public synchronized void updateLifts(List<LiftState> lifts) {
+        this.lifts = lifts;
+        notifyObservers();
     }
 
     public synchronized void updateHealth(int player1Health, int player2Health) {
@@ -145,5 +169,14 @@ public class ClientGameState extends ISubject {
 
     public synchronized ExitState getExit() {
         return exit;
+    }
+
+    public synchronized List<LiftState> getLifts() {
+        return lifts;
+    }
+
+    /** Nullable -- only levels with a lift have a lever. */
+    public synchronized LeverState getLever() {
+        return lever;
     }
 }

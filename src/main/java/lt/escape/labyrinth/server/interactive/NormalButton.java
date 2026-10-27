@@ -2,21 +2,21 @@ package lt.escape.labyrinth.server.interactive;
 
 public final class NormalButton extends Button {
 
-    public NormalButton(Door door) {
-        super(door);
+    public NormalButton(Mechanism target) {
+        super(target);
     }
 
     @Override
     public void press() {
-        if (door instanceof NormalDoor normalDoor) {
+        if (target instanceof NormalDoor normalDoor) {
             normalDoor.unlock();
         } else {
-            door.open();
+            target.activate();
         }
     }
 
     @Override
-    public NormalButton copyFor(Door door) {
-        return copyBoundsTo(new NormalButton(door));
+    public NormalButton copyFor(Mechanism target) {
+        return copyBoundsTo(new NormalButton(target));
     }
 }

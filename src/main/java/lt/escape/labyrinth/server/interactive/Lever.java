@@ -9,32 +9,41 @@ package lt.escape.labyrinth.server.interactive;
  * The doc also mentions levers operating lifts -- doing that would need
  * a shared interface Door and Lift both implement, which doesn't exist
  * yet, so it's not attempted here rather than guessed at.
+ *
+ * Update: that shared interface is now Mechanism (Bridge), so a Lever
+ * operates any Mechanism -- a Door or a Lift.
  */
-public class Lever extends InteractiveElement {
-    private final Door door;
+public class Lever extends Switch {
     private boolean state = false;
 
-    public Lever(Door door) {
-        this.door = door;
+    public Lever(Mechanism target) {
+        super(target);
     }
 
     public boolean getState() {
         return state;
     }
 
-    /** Prototype, like Button.copyFor(): same lever position, linked to the copied door. */
-    public Lever copyFor(Door door) {
-        Lever copy = copyBoundsTo(new Lever(door));
+    /** Prototype, like Button.copyFor(): same lever position, linked to the copied mechanism. */
+    @Override
+    public Lever copyFor(Mechanism target) {
+        Lever copy = copyBoundsTo(new Lever(target));
         copy.state = state;
         return copy;
+    }
+
+    /** Bridge: walking into the lever pulls it. */
+    @Override
+    public void onPlayerEnter() {
+        pull();
     }
 
     public void pull() {
         state = !state;
         if (state) {
-            door.open();
+            target.activate();
         } else {
-            door.close();
+            target.deactivate();
         }
     }
 

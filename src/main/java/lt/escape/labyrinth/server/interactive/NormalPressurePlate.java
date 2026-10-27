@@ -1,8 +1,8 @@
 package lt.escape.labyrinth.server.interactive;
 
 public final class NormalPressurePlate extends PressurePlate {
-    public NormalPressurePlate(Door door) { super(door); }
-    @Override public NormalPressurePlate copyFor(Door door) { return copyBoundsTo(new NormalPressurePlate(door)); }
-    @Override public void trigger() { door.open(); }
-    @Override public void release() { door.close(); }
+    public NormalPressurePlate(Mechanism target) { super(target); }
+    @Override public NormalPressurePlate copyFor(Mechanism target) { return copyBoundsTo(new NormalPressurePlate(target)); }
+    @Override public void trigger() { target.activate(); }
+    @Override public void release() { target.deactivate(); }
 }

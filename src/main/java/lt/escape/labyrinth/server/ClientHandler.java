@@ -12,6 +12,8 @@ import lt.escape.labyrinth.shared.DoorState;
 import lt.escape.labyrinth.shared.ButtonState;
 import lt.escape.labyrinth.shared.PressurePlateState;
 import lt.escape.labyrinth.shared.ExitState;
+import lt.escape.labyrinth.shared.LeverState;
+import lt.escape.labyrinth.shared.LiftState;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -146,6 +148,15 @@ public class ClientHandler implements Runnable {
                     .append(exit.getHeight());
         }
 
+        message.append("|LEVER:");
+        LeverState lever = gameState.getLever();
+        if (lever != null) {
+            message.append(lever.getX()).append(",")
+                    .append(lever.getY()).append(",")
+                    .append(lever.getWidth()).append(",")
+                    .append(lever.getHeight());
+        }
+
         output.println(message);
     }
 
@@ -196,6 +207,25 @@ public class ClientHandler implements Runnable {
         message.append("|DOOR_OPEN:");
         DoorState door = gameState.getDoor();
         message.append(door != null && door.isOpen());
+
+        // Lifts move, so their position goes out every tick (appended last so
+        // the fixed ENEMIES/BULLETS positions the client parses don't shift).
+        message.append("|LIFTS:");
+        List<LiftState> lifts = gameState.getLifts();
+        for (int i = 0; i < lifts.size(); i++) {
+            if (i > 0) {
+                message.append(";");
+            }
+            LiftState lift = lifts.get(i);
+            message.append(lift.getX()).append(",")
+                    .append(lift.getY()).append(",")
+                    .append(lift.getWidth()).append(",")
+                    .append(lift.getHeight());
+        }
+
+        message.append("|LEVER_ON:");
+        LeverState lever = gameState.getLever();
+        message.append(lever != null && lever.isOn());
 
         output.println(message);
     }

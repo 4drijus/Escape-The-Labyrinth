@@ -3,10 +3,12 @@ package lt.escape.labyrinth.server.engine;
 import lt.escape.labyrinth.server.enemy.Bullet;
 import lt.escape.labyrinth.server.enemy.Enemy;
 import lt.escape.labyrinth.server.interactive.Door;
+import lt.escape.labyrinth.server.interactive.Lever;
 import lt.escape.labyrinth.server.level.Level;
 import lt.escape.labyrinth.server.world.BlackPuddle;
 import lt.escape.labyrinth.server.world.BluePuddle;
 import lt.escape.labyrinth.server.world.Bush;
+import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.RedPuddle;
 import lt.escape.labyrinth.server.world.Tile;
 import lt.escape.labyrinth.server.world.Wall;
@@ -16,6 +18,8 @@ import lt.escape.labyrinth.shared.DoorState;
 import lt.escape.labyrinth.shared.EnemyState;
 import lt.escape.labyrinth.shared.ExitState;
 import lt.escape.labyrinth.shared.GameState;
+import lt.escape.labyrinth.shared.LeverState;
+import lt.escape.labyrinth.shared.LiftState;
 import lt.escape.labyrinth.shared.PressurePlateState;
 import lt.escape.labyrinth.shared.TileState;
 import lt.escape.labyrinth.shared.TileType;
@@ -33,6 +37,8 @@ import java.util.List;
 final class StateMirror {
 
     private final GameState state;
+    private List<Lift> lifts = List.of();
+    private Lever lever;
 
     StateMirror(GameState state) {
         this.state = state;
@@ -65,6 +71,17 @@ final class StateMirror {
         state.setExit(exit == null ? null
                 : new ExitState(exit.getX(), exit.getY(), exit.getWidth(), exit.getHeight()));
 
+        // Lifts and the lever change during play, so keep them for sync().
+        lifts = level.getLifts();
+        List<LiftState> liftStates = new ArrayList<>();
+        for (Lift lift : lifts) {
+            liftStates.add(new LiftState(lift.getPositionX(), lift.getPositionY(), lift.getWidth(), lift.getHeight()));
+        }
+        state.setLifts(liftStates);
+        lever = level.getLever();
+        state.setLever(lever == null ? null
+                : new LeverState(lever.getX(), lever.getY(), lever.getWidth(), lever.getHeight(), lever.getState()));
+
         state.getEnemies().clear();
         for (Enemy enemy : enemies) {
             state.getEnemies().add(new EnemyState(enemy.getType(), enemy.getX(), enemy.getY()));
@@ -88,6 +105,14 @@ final class StateMirror {
 
         if (door != null && state.getDoor() != null) {
             state.getDoor().setOpen(door.isOpen());
+        }
+
+        List<LiftState> liftStates = state.getLifts();
+        for (int i = 0; i < lifts.size(); i++) {
+            liftStates.get(i).setY(lifts.get(i).getPositionY());
+        }
+        if (lever != null && state.getLever() != null) {
+            state.getLever().setOn(lever.getState());
         }
     }
 

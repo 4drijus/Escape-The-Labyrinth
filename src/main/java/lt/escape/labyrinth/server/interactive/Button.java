@@ -1,12 +1,13 @@
 package lt.escape.labyrinth.server.interactive;
 
-public abstract class Button extends InteractiveElement {
-    protected final Door door;
-    protected Button(Door door) {
-        this.door = java.util.Objects.requireNonNull(door);
+public abstract class Button extends Switch {
+    protected Button(Mechanism target) {
+        super(target);
     }
     public abstract void press();
-    // Prototype for door-linked elements: the copy must open the copied
-    // door, not the original one, so the caller passes that door in.
-    public abstract Button copyFor(Door door);
+    // Bridge: touching a button presses it once.
+    @Override public void onPlayerEnter() { press(); }
+    // Prototype for linked elements: the copy must operate the copied
+    // mechanism, not the original one, so the caller passes it in.
+    @Override public abstract Button copyFor(Mechanism target);
 }
