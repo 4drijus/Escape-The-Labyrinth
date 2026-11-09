@@ -11,11 +11,8 @@ import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.Wall;
 
 /**
- * Shared part of every concrete builder. It builds everything that does NOT
- * depend on difficulty straight from the LevelLayout (map size, spawns, walls,
- * door, button, exit). The two steps that DO depend on difficulty --
- * buildTiles() and buildEnemies() -- are left abstract for
- * Easy/Medium/HardLevelBuilder to fill in.
+ * Shared level construction template. The fixed recipe calls shared steps
+ * and delegates tiles and enemies to the difficulty-specific builders.
  */
 public abstract class AbstractLevelBuilder implements ILevelBuilder {
 
@@ -26,6 +23,19 @@ public abstract class AbstractLevelBuilder implements ILevelBuilder {
     protected AbstractLevelBuilder(InteractiveElementFactory elementFactory, LevelLayout layout) {
         this.elementFactory = elementFactory;
         this.layout = layout;
+    }
+
+    @Override
+    public final Level buildLevel() {
+        reset();
+        buildDimensions();
+        buildPlayerStarts();
+        buildWalls();
+        buildTiles();
+        buildEnemies();
+        buildDoorAndSwitches();
+        buildExit();
+        return getResult();
     }
 
     @Override

@@ -1,36 +1,13 @@
 package lt.escape.labyrinth.server.level;
 
-import lt.escape.labyrinth.server.enemy.*;
-import lt.escape.labyrinth.server.interactive.Button;
-import lt.escape.labyrinth.server.interactive.Door;
-import lt.escape.labyrinth.server.interactive.Exit;
-import lt.escape.labyrinth.server.interactive.InteractiveElementFactory;
-import lt.escape.labyrinth.server.interactive.PressurePlate;
-import lt.escape.labyrinth.server.world.BlackPuddle;
-import lt.escape.labyrinth.server.world.BluePuddle;
-import lt.escape.labyrinth.server.world.Bush;
-import lt.escape.labyrinth.server.world.Potion;
-import lt.escape.labyrinth.server.world.RedPuddle;
-import lt.escape.labyrinth.server.world.Wall;
-
 /**
- * Director: knows the ORDER of the construction steps, but nothing about
- * what any particular level contains. It only talks to ILevelBuilder, so
- * the same sequence produces Level One, Two or Three depending on which
- * concrete builder it is handed.
+ * Director: requests a complete level through the builder contract.
+ * AbstractLevelBuilder owns the construction sequence for its subclasses.
  */
 public class LevelDirector {
 
     public Level construct(ILevelBuilder builder) {
-        builder.reset();
-        builder.buildDimensions();
-        builder.buildPlayerStarts();
-        builder.buildWalls();
-        builder.buildTiles();
-        builder.buildEnemies();
-        builder.buildDoorAndSwitches();
-        builder.buildExit();
-        return builder.getResult();
+        return builder.buildLevel();
     }
 }
 //
