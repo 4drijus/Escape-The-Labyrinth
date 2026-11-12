@@ -16,7 +16,7 @@ import lt.escape.labyrinth.server.world.RedPuddle;
  * Concrete builder: MEDIUM. Slowing puddles, a turret that cycles through
  * three movement strategies, and a slow-firing insta-death turret.
  */
-public class MediumLevelBuilder extends AbstractLevelBuilder {
+public final class MediumLevelBuilder extends AbstractLevelBuilder {
 
     public MediumLevelBuilder(InteractiveElementFactory elementFactory, LevelLayout layout) {
         super(elementFactory, layout);

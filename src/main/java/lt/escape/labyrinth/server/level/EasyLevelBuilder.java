@@ -11,7 +11,7 @@ import lt.escape.labyrinth.server.world.Bush;
  * Concrete builder: EASY. One spiky bush, one slow turret that fires rarely
  * and keeps pausing, no puddles.
  */
-public class EasyLevelBuilder extends AbstractLevelBuilder {
+public final class EasyLevelBuilder extends AbstractLevelBuilder {
 
     public EasyLevelBuilder(InteractiveElementFactory elementFactory, LevelLayout layout) {
         super(elementFactory, layout);

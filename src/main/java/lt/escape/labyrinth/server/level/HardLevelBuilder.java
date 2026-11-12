@@ -19,7 +19,7 @@ import lt.escape.labyrinth.server.world.RedPuddle;
  * ones, two spiky bushes, fast turrets that fire often, and two turrets that
  * hunt the nearest player.
  */
-public class HardLevelBuilder extends AbstractLevelBuilder {
+public final class HardLevelBuilder extends AbstractLevelBuilder {
 
     public HardLevelBuilder(InteractiveElementFactory elementFactory, LevelLayout layout) {
         super(elementFactory, layout);
