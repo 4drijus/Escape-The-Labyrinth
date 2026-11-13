@@ -11,6 +11,8 @@ public interface ILevelBuilder {
 
     void reset();
 
+    void setupLogging();
+
     void buildDimensions();
 
     void buildPlayerStarts();

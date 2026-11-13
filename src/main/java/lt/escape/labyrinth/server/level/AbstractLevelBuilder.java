@@ -28,6 +28,7 @@ public abstract class AbstractLevelBuilder implements ILevelBuilder {
     @Override
     public final Level buildLevel() {
         reset();
+        setupLogging();
         buildDimensions();
         buildPlayerStarts();
         buildWalls();
@@ -53,14 +54,16 @@ public abstract class AbstractLevelBuilder implements ILevelBuilder {
         return finished;
     }
 
-    // ---- difficulty-independent steps ----
+    // ---- difficulty-dependent steps: hook methods ----
     @Override
     public void buildDimensions() {
+        // Hook method: override to customize level dimensions per difficulty
         level.setDimensions(960, 600);
     }
 
     @Override
     public void buildPlayerStarts() {
+        // Hook method: override to customize player starting positions per difficulty
         LevelLayout.Area p1 = layout.getPlayer1Start();
         LevelLayout.Area p2 = layout.getPlayer2Start();
         level.setPlayerStarts(p1.x(), p1.y(), p2.x(), p2.y());
@@ -75,6 +78,7 @@ public abstract class AbstractLevelBuilder implements ILevelBuilder {
 
     @Override
     public void buildDoorAndSwitches() {
+        // Hook method: override to customize door/switch mechanisms per difficulty
         Door door = elementFactory.createDoor();
         place(door, layout.getDoor());
         level.setDoor(door);
@@ -121,10 +125,19 @@ public abstract class AbstractLevelBuilder implements ILevelBuilder {
         element.setBounds(area.x(), area.y(), area.width(), area.height());
     }
 
-    // ---- difficulty-dependent steps: each concrete builder decides ----
+    // ---- difficulty-dependent steps: hook methods with empty defaults ----
     @Override
-    public abstract void buildTiles();
+    public void buildTiles() {
+        // Hook method: override to add tiles for this difficulty level
+    }
 
     @Override
-    public abstract void buildEnemies();
+    public void buildEnemies() {
+        // Hook method: override to add enemies for this difficulty level
+    }
+
+    @Override
+    public void setupLogging() {
+        // Hook method: override to enable logging for this difficulty level
+    }
 }
