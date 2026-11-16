@@ -24,8 +24,6 @@ import lt.escape.labyrinth.shared.PlayerState;
  */
 final class PlayerPhysics {
 
-    private static final double MOVE_SPEED = 4;
-    private static final double JUMP_VELOCITY = -8;
     private static final double GRAVITY = 0.5;
 
     private List<CollisionObstacle> obstacles = List.of();
@@ -59,35 +57,25 @@ final class PlayerPhysics {
     }
 
     private void place(PlayerState player, double x, double y) {
-        player.setX(x);
-        player.setY(y);
-        player.setVelocityX(0);
-        player.setVelocityY(0);
-    }
-
-    void applyCommand(PlayerState player, PlayerCommand command) {
-        switch (command) {
-            case LEFT:
-                player.setVelocityX(-MOVE_SPEED);
-                break;
-            case RIGHT:
-                player.setVelocityX(MOVE_SPEED);
-                break;
-            case STOP:
-                player.setVelocityX(0);
-                break;
-            case JUMP:
-                if (player.isOnGround()) {
-                    player.setVelocityY(JUMP_VELOCITY);
-                    player.setOnGround(false);
-                }
-                break;
+        synchronized (player) {
+            player.setX(x);
+            player.setY(y);
+            player.setVelocityX(0);
+            player.setVelocityY(0);
+            player.updateMovementState();
         }
     }
 
+    void applyCommand(PlayerState player, PlayerCommand command) {
+        player.applyMovementCommand(command);
+    }
+
     void update(PlayerState player) {
-        moveHorizontally(player);
-        moveVertically(player);
+        synchronized (player) {
+            moveHorizontally(player);
+            moveVertically(player);
+            player.updateMovementState();
+        }
     }
 
     private void moveHorizontally(PlayerState player) {

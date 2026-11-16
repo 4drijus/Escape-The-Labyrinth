@@ -9,6 +9,7 @@ public class PlayerState implements Prototype<PlayerState> {
     private double velocityY;
 
     private boolean onGround;
+    private MovementState movementState = IdleState.INSTANCE;
 
     private int health;
 
@@ -47,6 +48,22 @@ public class PlayerState implements Prototype<PlayerState> {
 
     public boolean isOnGround() {
         return onGround;
+    }
+
+    public synchronized MovementState getMovementState() {
+        return movementState;
+    }
+
+    public synchronized void applyMovementCommand(PlayerCommand command) {
+        movementState.handleCommand(this, command);
+    }
+
+    public synchronized void updateMovementState() {
+        movementState.afterPhysics(this);
+    }
+
+    void setMovementState(MovementState movementState) {
+        this.movementState = movementState;
     }
 
     public int getHealth() {
@@ -97,11 +114,12 @@ public class PlayerState implements Prototype<PlayerState> {
     }
 
     @Override
-    public PlayerState copy() {
+    public synchronized PlayerState copy() {
         PlayerState copy = new PlayerState(playerId, x, y);
         copy.velocityX = velocityX;
         copy.velocityY = velocityY;
         copy.onGround = onGround;
+        copy.movementState = movementState;
         copy.health = health;
         copy.invulnerableUntil = invulnerableUntil;
         return copy;
@@ -111,13 +129,15 @@ public class PlayerState implements Prototype<PlayerState> {
      * Loads a checkpoint into this player. velocityX is kept: it follows the
      * keys held right now, not the ones held when the checkpoint was saved.
      */
-    public void restoreFrom(PlayerState saved) {
+    public synchronized void restoreFrom(PlayerState saved) {
         this.x = saved.x;
         this.y = saved.y;
         this.velocityY = saved.velocityY;
         this.onGround = saved.onGround;
+        this.movementState = saved.movementState;
         this.health = saved.health;
         this.invulnerableUntil = saved.invulnerableUntil;
+        updateMovementState();
     }
 
 }
