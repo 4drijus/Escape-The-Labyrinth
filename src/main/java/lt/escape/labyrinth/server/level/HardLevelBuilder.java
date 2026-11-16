@@ -26,7 +26,34 @@ public final class HardLevelBuilder extends AbstractLevelBuilder {
     }
 
     @Override
+    public void buildDimensions() {
+        level.setDimensions(960, 600);
+    }
+
+    @Override
+    public void buildPlayerStarts() {
+        LevelLayout.Area p1 = layout.getPlayer1Start();
+        LevelLayout.Area p2 = layout.getPlayer2Start();
+        level.setPlayerStarts(p1.x(), p1.y(), p2.x(), p2.y());
+    }
+
+    @Override
+    public void buildDoorAndSwitches() {
+        super.buildDoorAndSwitches();
+    }
+
+    @Override
+    public void setupLogging() {
+        LevelLogger.openWindow("HARD");
+        LevelLogger.log("========== HARD LEVEL BUILDER ==========");
+        LevelLogger.log("Building HARD difficulty level...");
+        LevelLogger.log("Features: Damaging puddles, multiple bushes, fast turrets with chase AI");
+        LevelLogger.log("========================================");
+    }
+
+    @Override
     public void buildTiles() {
+        LevelLogger.log("[HARD] Adding tiles: Bush + 3 puddles (Black, Red, Blue)");
         LevelLayout.Area cover = layout.getCoverSlots().get(0);
         level.addTile(new Bush(cover.x(), cover.y(), cover.width(), cover.height()));
 
@@ -40,6 +67,7 @@ public final class HardLevelBuilder extends AbstractLevelBuilder {
 
     @Override
     public void buildEnemies() {
+        LevelLogger.log("[HARD] Adding enemies: 2 SpikyBushes + 3 Turrets (Shifter, Sniper, Hunter)");
         for (int i = 0; i < 2; i++) {
             LevelLayout.Area ground = layout.getGroundSlots().get(i);
             level.addEnemy(new SpikyBush(ground.x(), ground.y(), 1));

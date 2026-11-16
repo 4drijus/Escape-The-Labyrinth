@@ -23,7 +23,34 @@ public final class MediumLevelBuilder extends AbstractLevelBuilder {
     }
 
     @Override
+    public void buildDimensions() {
+        level.setDimensions(960, 600);
+    }
+
+    @Override
+    public void buildPlayerStarts() {
+        LevelLayout.Area p1 = layout.getPlayer1Start();
+        LevelLayout.Area p2 = layout.getPlayer2Start();
+        level.setPlayerStarts(p1.x(), p1.y(), p2.x(), p2.y());
+    }
+
+    @Override
+    public void buildDoorAndSwitches() {
+        super.buildDoorAndSwitches();
+    }
+
+    @Override
+    public void setupLogging() {
+        LevelLogger.openWindow("MEDIUM");
+        LevelLogger.log("========== MEDIUM LEVEL BUILDER ==========");
+        LevelLogger.log("Building MEDIUM difficulty level...");
+        LevelLogger.log("Features: Slowing puddles, turrets with complex behaviors");
+        LevelLogger.log("==========================================");
+    }
+
+    @Override
     public void buildTiles() {
+        LevelLogger.log("[MEDIUM] Adding tiles: Bush + 2 puddles (Red, Blue)");
         LevelLayout.Area cover = layout.getCoverSlots().get(0);
         level.addTile(new Bush(cover.x(), cover.y(), cover.width(), cover.height()));
 
@@ -35,6 +62,7 @@ public final class MediumLevelBuilder extends AbstractLevelBuilder {
 
     @Override
     public void buildEnemies() {
+        LevelLogger.log("[MEDIUM] Adding enemies: 1 SpikyBush + 2 Turrets (Roamer + Sniper)");
         LevelLayout.Area ground = layout.getGroundSlots().get(0);
         level.addEnemy(new SpikyBush(ground.x(), ground.y(), 1));
 
@@ -47,7 +75,7 @@ public final class MediumLevelBuilder extends AbstractLevelBuilder {
         level.addEnemy(roamer);
 
         LevelLayout.Area sniperSpot = layout.getTurretSlots().get(1);
-        InstaDeathTurret sniper = new InstaDeathTurret(sniperSpot.x(), sniperSpot.y(), 5000); // fires every 5s
+        InstaDeathTurret sniper = new InstaDeathTurret(sniperSpot.x(), sniperSpot.y(), 5000);
         sniper.setBehaviorRotation(8.0, new ZigZagBehavior(60, 30, 40), new StationaryBehavior());
         level.addEnemy(sniper);
     }

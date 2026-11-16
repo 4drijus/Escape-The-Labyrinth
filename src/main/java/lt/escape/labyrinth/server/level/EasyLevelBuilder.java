@@ -18,6 +18,23 @@ public final class EasyLevelBuilder extends AbstractLevelBuilder {
     }
 
     @Override
+    public void buildDimensions() {
+        level.setDimensions(960, 600);
+    }
+
+    @Override
+    public void buildPlayerStarts() {
+        LevelLayout.Area p1 = layout.getPlayer1Start();
+        LevelLayout.Area p2 = layout.getPlayer2Start();
+        level.setPlayerStarts(p1.x(), p1.y(), p2.x(), p2.y());
+    }
+
+    @Override
+    public void buildDoorAndSwitches() {
+        super.buildDoorAndSwitches();
+    }
+
+    @Override
     public void buildTiles() {
         LevelLayout.Area cover = layout.getCoverSlots().get(0);
         level.addTile(new Bush(cover.x(), cover.y(), cover.width(), cover.height()));
