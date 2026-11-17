@@ -48,13 +48,13 @@ final class StateMirror {
     void publishLevel(Level level, List<Enemy> enemies) {
         List<WallState> walls = new ArrayList<>();
         for (Wall wall : level.getWalls()) {
-            walls.add(new WallState(wall.getPositionX(), wall.getPositionY(), wall.getWidth(), wall.getHeight()));
+            walls.add(new WallState(wall.getX(), wall.getY(), wall.getWidth(), wall.getHeight()));
         }
         state.setWalls(walls);
 
         List<TileState> tiles = new ArrayList<>();
         for (Tile tile : level.getTiles()) {
-            tiles.add(new TileState(tileTypeOf(tile), tile.getPositionX(), tile.getPositionY(), tile.getWidth(), tile.getHeight()));
+            tiles.add(new TileState(tileTypeOf(tile), tile.getX(), tile.getY(), tile.getWidth(), tile.getHeight()));
         }
         state.setTiles(tiles);
 
@@ -75,7 +75,7 @@ final class StateMirror {
         lifts = level.getLifts();
         List<LiftState> liftStates = new ArrayList<>();
         for (Lift lift : lifts) {
-            liftStates.add(new LiftState(lift.getPositionX(), lift.getPositionY(), lift.getWidth(), lift.getHeight()));
+            liftStates.add(new LiftState(lift.getX(), lift.getY(), lift.getWidth(), lift.getHeight()));
         }
         state.setLifts(liftStates);
         lever = level.getLever();
@@ -109,7 +109,7 @@ final class StateMirror {
 
         List<LiftState> liftStates = state.getLifts();
         for (int i = 0; i < lifts.size(); i++) {
-            liftStates.get(i).setY(lifts.get(i).getPositionY());
+            liftStates.get(i).setY(lifts.get(i).getY());
         }
         if (lever != null && state.getLever() != null) {
             state.getLever().setOn(lever.getState());

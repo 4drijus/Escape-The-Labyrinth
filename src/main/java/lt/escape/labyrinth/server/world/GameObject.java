@@ -1,10 +1,14 @@
 package lt.escape.labyrinth.server.world;
 
 /**
- * Base class for anything placed in a level at a fixed position: tiles,
- * walls, movable objects. The original sketch only had positionX/positionY;
- * width/height are added here because collision (Wall blocking a Turret,
- * a puddle's trigger area) needs a bounding box, not just a point.
+ * Base class for anything that is part of a level: tiles, walls, movable
+ * objects, interactive elements (doors, switches, the exit) and enemies.
+ * The original sketch only had positionX/positionY; width/height are added
+ * here because collision (Wall blocking a Turret, a puddle's trigger area)
+ * needs a bounding box, not just a point.
+ *
+ * One common type is what lets Level hand out a single iterator over
+ * everything it contains.
  */
 public abstract class GameObject {
     protected double positionX;
@@ -19,11 +23,15 @@ public abstract class GameObject {
         this.height = height;
     }
 
-    public double getPositionX() {
+    /** For objects placed after they're created (factory-made interactive elements). */
+    protected GameObject() {
+    }
+
+    public double getX() {
         return positionX;
     }
 
-    public double getPositionY() {
+    public double getY() {
         return positionY;
     }
 

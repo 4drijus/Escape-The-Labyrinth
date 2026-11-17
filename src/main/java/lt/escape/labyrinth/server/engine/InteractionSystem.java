@@ -42,11 +42,10 @@ final class InteractionSystem {
         door = level.getDoor();
         exit = level.getExit();
 
+        // Iterator: whichever switches this level has (button, plate, lever), in the level's order.
         List<Switch> found = new ArrayList<>();
-        for (Switch sw : new Switch[] {level.getButton(), level.getPressurePlate(), level.getLever()}) {
-            if (sw != null) {
-                found.add(sw);
-            }
+        for (Switch sw : level.objects(Switch.class)) {
+            found.add(sw);
         }
         switches = found;
         occupied = new boolean[switches.size()];
@@ -60,7 +59,7 @@ final class InteractionSystem {
         applyTileEffects(players);
         collectPotions(players);
         for (Lift lift : lifts) {
-            double oldTop = lift.getPositionY();
+            double oldTop = lift.getY();
             lift.update(deltaTime);
             carryRiders(lift, oldTop, players);
         }
@@ -114,14 +113,14 @@ final class InteractionSystem {
      * as soon as they try to walk.
      */
     private void carryRiders(Lift lift, double oldTop, List<PlayerState> players) {
-        double dy = lift.getPositionY() - oldTop;
+        double dy = lift.getY() - oldTop;
         if (dy == 0) {
             return;
         }
         for (PlayerState player : players) {
             boolean standingOnIt = Math.abs(player.getY() + PLAYER_HEIGHT - oldTop) < 1
-                    && player.getX() < lift.getPositionX() + lift.getWidth()
-                    && player.getX() + PLAYER_WIDTH > lift.getPositionX();
+                    && player.getX() < lift.getX() + lift.getWidth()
+                    && player.getX() + PLAYER_WIDTH > lift.getX();
             if (standingOnIt) {
                 player.setY(player.getY() + dy);
             }

@@ -47,8 +47,8 @@ public abstract class Turret extends Enemy {
     }
 
     private Bullet fire(PlayerState target) {
-        double dx = target.getX() - x;
-        double dy = target.getY() - y;
+        double dx = target.getX() - positionX;
+        double dy = target.getY() - positionY;
         double length = Math.sqrt(dx * dx + dy * dy);
 
         if (length == 0) {
@@ -58,7 +58,7 @@ public abstract class Turret extends Enemy {
         double directionX = dx / length;
         double directionY = dy / length;
 
-        return createBullet(x, y, directionX, directionY);
+        return createBullet(positionX, positionY, directionX, directionY);
     }
 
     private PlayerState nearestPlayer(List<PlayerState> players) {
@@ -76,8 +76,8 @@ public abstract class Turret extends Enemy {
     }
 
     private double distanceSquared(PlayerState player) {
-        double dx = player.getX() - x;
-        double dy = player.getY() - y;
+        double dx = player.getX() - positionX;
+        double dy = player.getY() - positionY;
         return dx * dx + dy * dy;
     }
 }
