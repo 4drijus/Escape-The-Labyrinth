@@ -2,7 +2,9 @@ package lt.escape.labyrinth.client;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -14,6 +16,9 @@ import lt.escape.labyrinth.client.effects.NameEffect;
 import lt.escape.labyrinth.client.effects.PlayerRenderer;
 import lt.escape.labyrinth.client.effects.RunEffect;
 import lt.escape.labyrinth.client.effects.TrailEffect;
+import lt.escape.labyrinth.client.scene.DecorationGroup;
+import lt.escape.labyrinth.client.scene.DecorationSprite;
+import lt.escape.labyrinth.client.scene.SceneDecoration;
 import lt.escape.labyrinth.shared.BulletState;
 import lt.escape.labyrinth.shared.ButtonState;
 import lt.escape.labyrinth.shared.DoorState;
@@ -31,6 +36,7 @@ public class GamePanel extends JPanel implements IObserver {
     private final NetworkClient networkClient;
     private final InputHandler inputHandler;
     private final Timer gameTimer;
+    private final SceneDecoration decorations = createDecorations();
 
     private final PlayerRenderer[] playerRenderers = {
         createPlayerRenderer(),
@@ -89,9 +95,69 @@ public class GamePanel extends JPanel implements IObserver {
         repaint();
     }
 
+    private static BufferedImage createRockImage() {
+        BufferedImage image = new BufferedImage(
+                40, 24, BufferedImage.TYPE_INT_ARGB
+        );
+
+        Graphics2D g = image.createGraphics();
+
+        try {
+            int[] xs = {1, 8, 27, 38, 35, 5};
+            int[] ys = {19, 5, 2, 13, 22, 23};
+
+            g.setColor(new Color(112, 119, 132));
+            g.fillPolygon(xs, ys, xs.length);
+
+            g.setColor(new Color(162, 170, 183));
+            g.drawLine(9, 6, 26, 3);
+            g.drawLine(26, 3, 35, 13);
+
+            g.setColor(new Color(68, 74, 86));
+            g.drawLine(7, 21, 33, 20);
+        } finally {
+            g.dispose();
+        }
+
+        return image;
+    }
+
+    private static SceneDecoration createDecorations() {
+        BufferedImage rock = createRockImage();
+
+        DecorationGroup leftCluster = new DecorationGroup(
+                70, 110,
+                new DecorationSprite(rock, 0, 12, 40, 24),
+                new DecorationSprite(rock, 35, 20, 25, 15),
+                new DecorationSprite(rock, 58, 8, 32, 20)
+        );
+
+        DecorationGroup rightCluster = new DecorationGroup(
+                650, 150,
+                new DecorationSprite(rock, 0, 10, 35, 21),
+                new DecorationSprite(rock, 30, 18, 22, 13),
+                new DecorationSprite(rock, 50, 0, 45, 27)
+        );
+
+        DecorationGroup root = new DecorationGroup(0, 0);
+
+        root.add(leftCluster);
+        root.add(rightCluster);
+
+        SceneDecoration singleRock
+                = new DecorationSprite(rock, 420, 90, 28, 17);
+
+        root.add(singleRock);
+        //root.remove(singleRock);
+        //leftCluster.setPosition(170, 110);
+
+        return root;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        decorations.draw(g, 0, 0);// Composite: draw the entire decoration tree
         ClientGameState state = networkClient.getGameState();
 
         // Walls -- drawn first, as solid blocking geometry.
