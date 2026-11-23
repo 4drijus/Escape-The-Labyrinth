@@ -21,8 +21,8 @@ public final class LiftCollisionAdapter implements CollisionObstacle {
     @Override
     public Rectangle2D getBounds() {
         return new Rectangle2D.Double(
-                lift.getX(),
-                lift.getY(),
+                lift.getPositionX(),
+                lift.getPositionY(),
                 lift.getWidth(),
                 lift.getHeight()
         );

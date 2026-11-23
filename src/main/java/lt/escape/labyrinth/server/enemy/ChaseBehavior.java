@@ -36,21 +36,21 @@ public class ChaseBehavior implements Behavior {
             return;
         }
 
-        double dx = target.getX() - enemy.getX();
-        double dy = target.getY() - enemy.getY();
+        double dx = target.getX() - enemy.getPositionX();
+        double dy = target.getY() - enemy.getPositionY();
         double distance = Math.hypot(dx, dy);
         if (distance <= keepDistance) {
             return; // close enough, stay put and shoot
         }
 
         double step = Math.min(speed * deltaTime, distance - keepDistance);
-        double newX = enemy.getX() + dx / distance * step;
-        double newY = enemy.getY() + dy / distance * step;
+        double newX = enemy.getPositionX() + dx / distance * step;
+        double newY = enemy.getPositionY() + dy / distance * step;
 
-        if (!enemy.wouldHitWall(newX, enemy.getY(), walls)) {
+        if (!enemy.wouldHitWall(newX, enemy.getPositionY(), walls)) {
             enemy.setX(newX);
         }
-        if (!enemy.wouldHitWall(enemy.getX(), newY, walls)) {
+        if (!enemy.wouldHitWall(enemy.getPositionX(), newY, walls)) {
             enemy.setY(newY);
         }
     }
@@ -59,7 +59,7 @@ public class ChaseBehavior implements Behavior {
         PlayerState best = null;
         double bestDistance = Double.MAX_VALUE;
         for (PlayerState player : players) {
-            double distance = Math.hypot(player.getX() - enemy.getX(), player.getY() - enemy.getY());
+            double distance = Math.hypot(player.getX() - enemy.getPositionX(), player.getY() - enemy.getPositionY());
             if (distance < bestDistance) {
                 bestDistance = distance;
                 best = player;

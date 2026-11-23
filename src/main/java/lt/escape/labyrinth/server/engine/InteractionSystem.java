@@ -59,7 +59,7 @@ final class InteractionSystem {
         applyTileEffects(players);
         collectPotions(players);
         for (Lift lift : lifts) {
-            double oldTop = lift.getY();
+            double oldTop = lift.getPositionY();
             lift.update(deltaTime);
             carryRiders(lift, oldTop, players);
         }
@@ -113,14 +113,14 @@ final class InteractionSystem {
      * as soon as they try to walk.
      */
     private void carryRiders(Lift lift, double oldTop, List<PlayerState> players) {
-        double dy = lift.getY() - oldTop;
+        double dy = lift.getPositionY() - oldTop;
         if (dy == 0) {
             return;
         }
         for (PlayerState player : players) {
             boolean standingOnIt = Math.abs(player.getY() + PLAYER_HEIGHT - oldTop) < 1
-                    && player.getX() < lift.getX() + lift.getWidth()
-                    && player.getX() + PLAYER_WIDTH > lift.getX();
+                    && player.getX() < lift.getPositionX() + lift.getWidth()
+                    && player.getX() + PLAYER_WIDTH > lift.getPositionX();
             if (standingOnIt) {
                 player.setY(player.getY() + dy);
             }
@@ -160,7 +160,7 @@ final class InteractionSystem {
     private boolean anyPlayerOverlaps(List<PlayerState> players, InteractiveElement element) {
         for (PlayerState player : players) {
             if (Geometry.overlaps(player.getX(), player.getY(), PLAYER_WIDTH, PLAYER_HEIGHT,
-                    element.getX(), element.getY(), element.getWidth(), element.getHeight())) {
+                    element.getPositionX(), element.getPositionY(), element.getWidth(), element.getHeight())) {
                 return true;
             }
         }

@@ -12,7 +12,7 @@ import java.util.List;
  * standing inside the exit zone at the same time before the level ends.
  *
  * The zone's position and size are the bounds inherited from
- * InteractiveElement (setBounds / getX / getY / getWidth / getHeight).
+ * InteractiveElement (setBounds / getPositionX / getPositionY / getWidth / getHeight).
  */
 public class Exit extends InteractiveElement implements Prototype<Exit> {
 
@@ -41,8 +41,8 @@ public class Exit extends InteractiveElement implements Prototype<Exit> {
     private boolean isInside(PlayerState player) {
         double centerX = player.getX() + GameConstants.PLAYER_WIDTH / 2;
         double centerY = player.getY() + GameConstants.PLAYER_HEIGHT / 2;
-        return centerX >= getX() && centerX <= getX() + getWidth()
-                && centerY >= getY() && centerY <= getY() + getHeight();
+        return centerX >= getPositionX() && centerX <= getPositionX() + getWidth()
+                && centerY >= getPositionY() && centerY <= getPositionY() + getHeight();
     }
 
     /** Call once checkPlayerAmount() has returned true. */

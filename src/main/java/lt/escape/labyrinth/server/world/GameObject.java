@@ -27,11 +27,11 @@ public abstract class GameObject {
     protected GameObject() {
     }
 
-    public double getX() {
+    public double getPositionX() {
         return positionX;
     }
 
-    public double getY() {
+    public double getPositionY() {
         return positionY;
     }
 

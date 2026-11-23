@@ -39,12 +39,12 @@ public class VerticalPatrolBehavior implements Behavior {
     @Override
     public void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime) {
         if (!initialized) {
-            startY = enemy.getY();
+            startY = enemy.getPositionY();
             initialized = true;
         }
 
         double step = speed * deltaTime * (movingUp ? -1 : 1);
-        double newY = enemy.getY() + step;
+        double newY = enemy.getPositionY() + step;
 
         if (newY < startY - range) {
             newY = startY - range;
@@ -54,7 +54,7 @@ public class VerticalPatrolBehavior implements Behavior {
             movingUp = true;
         }
 
-        if (enemy.wouldHitWall(enemy.getX(), newY, walls)) {
+        if (enemy.wouldHitWall(enemy.getPositionX(), newY, walls)) {
             movingUp = !movingUp;
             return;
         }

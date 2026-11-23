@@ -30,12 +30,12 @@ public class PatrolBehavior implements Behavior {
     @Override
     public void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime) {
         if (!initialized) {
-            startX = enemy.getX();
+            startX = enemy.getPositionX();
             initialized = true;
         }
 
         double step = speed * deltaTime * (movingRight ? 1 : -1);
-        double newX = enemy.getX() + step;
+        double newX = enemy.getPositionX() + step;
 
         if (newX > startX + range) {
             newX = startX + range;
@@ -45,7 +45,7 @@ public class PatrolBehavior implements Behavior {
             movingRight = true;
         }
 
-        if (enemy.wouldHitWall(newX, enemy.getY(), walls)) {
+        if (enemy.wouldHitWall(newX, enemy.getPositionY(), walls)) {
             movingRight = !movingRight; // don't enter the wall; go the other way next tick
             return;
         }

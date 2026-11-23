@@ -17,8 +17,8 @@ public final class WallCollisionAdapter implements CollisionObstacle {
     @Override
     public Rectangle2D getBounds() {
         return new Rectangle2D.Double(
-                wall.getX(),
-                wall.getY(),
+                wall.getPositionX(),
+                wall.getPositionY(),
                 wall.getWidth(),
                 wall.getHeight()
         );
