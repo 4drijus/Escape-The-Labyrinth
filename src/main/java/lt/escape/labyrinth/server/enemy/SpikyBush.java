@@ -36,8 +36,8 @@ public class SpikyBush extends Enemy {
     }
 
     public boolean isTouching(PlayerState player) {
-        double dx = player.getX() - x;
-        double dy = player.getY() - y;
+        double dx = player.getX() - positionX;
+        double dy = player.getY() - positionY;
         return Math.sqrt(dx * dx + dy * dy) <= TOUCH_RADIUS;
     }
 

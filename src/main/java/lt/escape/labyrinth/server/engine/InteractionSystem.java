@@ -42,11 +42,10 @@ final class InteractionSystem {
         door = level.getDoor();
         exit = level.getExit();
 
+        // Iterator: whichever switches this level has (button, plate, lever), in the level's order.
         List<Switch> found = new ArrayList<>();
-        for (Switch sw : new Switch[] {level.getButton(), level.getPressurePlate(), level.getLever()}) {
-            if (sw != null) {
-                found.add(sw);
-            }
+        for (Switch sw : level.objects(Switch.class)) {
+            found.add(sw);
         }
         switches = found;
         occupied = new boolean[switches.size()];
@@ -161,7 +160,7 @@ final class InteractionSystem {
     private boolean anyPlayerOverlaps(List<PlayerState> players, InteractiveElement element) {
         for (PlayerState player : players) {
             if (Geometry.overlaps(player.getX(), player.getY(), PLAYER_WIDTH, PLAYER_HEIGHT,
-                    element.getX(), element.getY(), element.getWidth(), element.getHeight())) {
+                    element.getPositionX(), element.getPositionY(), element.getWidth(), element.getHeight())) {
                 return true;
             }
         }

@@ -60,16 +60,16 @@ final class StateMirror {
 
         Door door = level.getDoor();
         state.setDoor(door == null ? null
-                : new DoorState(door.getX(), door.getY(), door.getWidth(), door.getHeight(), door.isOpen()));
+                : new DoorState(door.getPositionX(), door.getPositionY(), door.getWidth(), door.getHeight(), door.isOpen()));
         var button = level.getButton();
         state.setButton(button == null ? null
-                : new ButtonState(button.getX(), button.getY(), button.getWidth(), button.getHeight()));
+                : new ButtonState(button.getPositionX(), button.getPositionY(), button.getWidth(), button.getHeight()));
         var plate = level.getPressurePlate();
         state.setPressurePlate(plate == null ? null
-                : new PressurePlateState(plate.getX(), plate.getY(), plate.getWidth(), plate.getHeight()));
+                : new PressurePlateState(plate.getPositionX(), plate.getPositionY(), plate.getWidth(), plate.getHeight()));
         var exit = level.getExit();
         state.setExit(exit == null ? null
-                : new ExitState(exit.getX(), exit.getY(), exit.getWidth(), exit.getHeight()));
+                : new ExitState(exit.getPositionX(), exit.getPositionY(), exit.getWidth(), exit.getHeight()));
 
         // Lifts and the lever change during play, so keep them for sync().
         lifts = level.getLifts();
@@ -80,11 +80,11 @@ final class StateMirror {
         state.setLifts(liftStates);
         lever = level.getLever();
         state.setLever(lever == null ? null
-                : new LeverState(lever.getX(), lever.getY(), lever.getWidth(), lever.getHeight(), lever.getState()));
+                : new LeverState(lever.getPositionX(), lever.getPositionY(), lever.getWidth(), lever.getHeight(), lever.getState()));
 
         state.getEnemies().clear();
         for (Enemy enemy : enemies) {
-            state.getEnemies().add(new EnemyState(enemy.getType(), enemy.getX(), enemy.getY()));
+            state.getEnemies().add(new EnemyState(enemy.getType(), enemy.getPositionX(), enemy.getPositionY()));
         }
         state.setBullets(new ArrayList<>());
     }
@@ -93,8 +93,8 @@ final class StateMirror {
     void sync(List<Enemy> enemies, List<Bullet> bullets, Door door) {
         List<EnemyState> enemyStates = state.getEnemies();
         for (int i = 0; i < enemies.size(); i++) {
-            enemyStates.get(i).setX(enemies.get(i).getX());
-            enemyStates.get(i).setY(enemies.get(i).getY());
+            enemyStates.get(i).setX(enemies.get(i).getPositionX());
+            enemyStates.get(i).setY(enemies.get(i).getPositionY());
         }
 
         List<BulletState> bulletStates = new ArrayList<>();

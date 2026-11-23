@@ -1,6 +1,7 @@
 package lt.escape.labyrinth.server.enemy;
 
 import lt.escape.labyrinth.server.GameConstants;
+import lt.escape.labyrinth.server.world.GameObject;
 import lt.escape.labyrinth.server.world.Wall;
 import lt.escape.labyrinth.shared.EnemyType;
 import lt.escape.labyrinth.shared.PlayerState;
@@ -19,11 +20,12 @@ import java.util.List;
  *    switches to the next strategy in a list, looping forever.
  *
  * Each concrete enemy implements copy()
+ *
+ * A GameObject like everything else in a level, so the level's iterator
+ * includes enemies. Its box is ENEMY_SIZE square, the size wouldHitWall() uses.
  */
-public abstract class Enemy implements Prototype<Enemy> {
+public abstract class Enemy extends GameObject implements Prototype<Enemy> {
 
-    protected double x;
-    protected double y;
     private Behavior behavior;
 
     // Optional runtime switching (see setBehaviorRotation).
@@ -33,8 +35,7 @@ public abstract class Enemy implements Prototype<Enemy> {
     private int rotationIndex;
 
     protected Enemy(double x, double y, Behavior behavior) {
-        this.x = x;
-        this.y = y;
+        super(x, y, GameConstants.ENEMY_SIZE, GameConstants.ENEMY_SIZE);
         this.behavior = behavior;
     }
 
@@ -43,8 +44,7 @@ public abstract class Enemy implements Prototype<Enemy> {
      * and the copy carries on from the same point in its rotation.
      */
     protected Enemy(Enemy source) {
-        this.x = source.x;
-        this.y = source.y;
+        super(source.positionX, source.positionY, source.width, source.height);
         this.rotation = source.rotation.stream().map(Behavior::copy).toList();
         this.rotationIntervalSeconds = source.rotationIntervalSeconds;
         this.rotationTimer = source.rotationTimer;
@@ -127,19 +127,11 @@ public abstract class Enemy implements Prototype<Enemy> {
         return false;
     }
 
-    public double getX() {
-        return x;
-    }
-
     public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
+        this.positionX = x;
     }
 
     public void setY(double y) {
-        this.y = y;
+        this.positionY = y;
     }
 }

@@ -9,6 +9,7 @@ import lt.escape.labyrinth.server.interactive.Mechanism;
 import lt.escape.labyrinth.server.interactive.PressurePlate;
 import lt.escape.labyrinth.server.interactive.Switch;
 import lt.escape.labyrinth.server.world.Box;
+import lt.escape.labyrinth.server.world.GameObject;
 import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.Potion;
 import lt.escape.labyrinth.server.world.Sign;
@@ -19,6 +20,7 @@ import lt.escape.labyrinth.shared.Prototype;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +32,11 @@ import java.util.Map;
  *
  * Door, Button, PressurePlate and Exit carry their own position (see
  * InteractiveElement.setBounds), so Level just holds the elements.
+ *
+ * ITERATOR's aggregate: for (GameObject object : level) visits everything
+ * in the level, and objects(type) only one kind of thing -- see LevelIterator.
  */
-public class Level implements Prototype<Level> {
+public class Level implements Prototype<Level>, Iterable<GameObject> {
 
     private double width = 960;
     private double height = 600;
@@ -192,6 +197,19 @@ public class Level implements Prototype<Level> {
     /** Nullable. */
     public Exit getExit() {
         return exit;
+    }
+
+    // ---- Iterator ----
+
+    /** Everything in the level, in LevelIterator's fixed order. */
+    @Override
+    public Iterator<GameObject> iterator() {
+        return new LevelIterator(this);
+    }
+
+    /** Only one kind, e.g. objects(Switch.class), objects(Mechanism.class), objects(Enemy.class). */
+    public <T> Iterable<T> objects(Class<T> type) {
+        return () -> new TypeFilterIterator<>(iterator(), type);
     }
 
     // ---- Prototype ----

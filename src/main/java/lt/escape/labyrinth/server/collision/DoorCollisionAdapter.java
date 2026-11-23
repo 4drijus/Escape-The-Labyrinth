@@ -20,8 +20,8 @@ public final class DoorCollisionAdapter implements CollisionObstacle {
     @Override
     public Rectangle2D getBounds() {
         return new Rectangle2D.Double(
-                door.getX(),
-                door.getY(),
+                door.getPositionX(),
+                door.getPositionY(),
                 door.getWidth(),
                 door.getHeight()
         );

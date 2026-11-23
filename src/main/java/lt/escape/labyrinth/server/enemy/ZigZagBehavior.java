@@ -47,14 +47,14 @@ public class ZigZagBehavior implements Behavior {
     @Override
     public void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime) {
         if (!initialized) {
-            startX = enemy.getX();
-            startY = enemy.getY();
+            startX = enemy.getPositionX();
+            startY = enemy.getPositionY();
             initialized = true;
         }
 
         double step = speed * deltaTime;
-        double newX = enemy.getX() + (movingRight ? step : -step);
-        double newY = enemy.getY() + (movingDown ? step : -step);
+        double newX = enemy.getPositionX() + (movingRight ? step : -step);
+        double newY = enemy.getPositionY() + (movingDown ? step : -step);
 
         if (newX > startX + rangeX) {
             newX = startX + rangeX;
@@ -73,13 +73,13 @@ public class ZigZagBehavior implements Behavior {
         }
 
         // Resolve each axis separately so a wall only flips the axis that hit it.
-        if (enemy.wouldHitWall(newX, enemy.getY(), walls)) {
+        if (enemy.wouldHitWall(newX, enemy.getPositionY(), walls)) {
             movingRight = !movingRight;
-            newX = enemy.getX();
+            newX = enemy.getPositionX();
         }
         if (enemy.wouldHitWall(newX, newY, walls)) {
             movingDown = !movingDown;
-            newY = enemy.getY();
+            newY = enemy.getPositionY();
         }
 
         enemy.setX(newX);
