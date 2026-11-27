@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.enemy;
 
 import lt.escape.labyrinth.shared.BulletType;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 public class NormalBullet extends Bullet {
 
@@ -25,7 +25,7 @@ public class NormalBullet extends Bullet {
     }
 
     @Override
-    public void onHit(PlayerState player) {
+    public void onHit(Player player) {
         player.takeDamage(damage);
     }
 

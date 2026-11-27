@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.enemy;
 
 import lt.escape.labyrinth.server.world.Wall;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +33,7 @@ public abstract class Turret extends Enemy {
     protected abstract Bullet createBullet(double x, double y, double directionX, double directionY);
 
     @Override
-    public List<Bullet> update(List<PlayerState> players, List<Wall> walls, double deltaTime) {
+    public List<Bullet> update(List<Player> players, List<Wall> walls, double deltaTime) {
         super.update(players, walls, deltaTime); // still lets the Behavior run
 
         msSinceLastShot += (long) (deltaTime * 1000);
@@ -42,11 +42,11 @@ public abstract class Turret extends Enemy {
         }
 
         msSinceLastShot = 0;
-        PlayerState target = nearestPlayer(players);
+        Player target = nearestPlayer(players);
         return List.of(fire(target));
     }
 
-    private Bullet fire(PlayerState target) {
+    private Bullet fire(Player target) {
         double dx = target.getX() - positionX;
         double dy = target.getY() - positionY;
         double length = Math.sqrt(dx * dx + dy * dy);
@@ -61,11 +61,11 @@ public abstract class Turret extends Enemy {
         return createBullet(positionX, positionY, directionX, directionY);
     }
 
-    private PlayerState nearestPlayer(List<PlayerState> players) {
-        PlayerState nearest = players.get(0);
+    private Player nearestPlayer(List<Player> players) {
+        Player nearest = players.get(0);
         double bestDistSq = distanceSquared(nearest);
 
-        for (PlayerState player : players) {
+        for (Player player : players) {
             double distSq = distanceSquared(player);
             if (distSq < bestDistSq) {
                 bestDistSq = distSq;
@@ -75,7 +75,7 @@ public abstract class Turret extends Enemy {
         return nearest;
     }
 
-    private double distanceSquared(PlayerState player) {
+    private double distanceSquared(Player player) {
         double dx = player.getX() - positionX;
         double dy = player.getY() - positionY;
         return dx * dx + dy * dy;

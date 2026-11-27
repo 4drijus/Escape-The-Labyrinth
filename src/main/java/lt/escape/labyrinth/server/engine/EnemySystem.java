@@ -5,7 +5,7 @@ import lt.escape.labyrinth.server.enemy.Enemy;
 import lt.escape.labyrinth.server.enemy.SpikyBush;
 import lt.escape.labyrinth.server.level.Level;
 import lt.escape.labyrinth.server.world.Wall;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +36,7 @@ final class EnemySystem {
         levelHeight = level.getHeight();
     }
 
-    void update(List<PlayerState> players, double deltaTime) {
+    void update(List<Player> players, double deltaTime) {
         for (Enemy enemy : enemies) {
             bullets.addAll(enemy.update(players, walls, deltaTime));
         }
@@ -45,7 +45,7 @@ final class EnemySystem {
         applyContactDamage(players);
     }
 
-    private void updateBullets(List<PlayerState> players, double deltaTime) {
+    private void updateBullets(List<Player> players, double deltaTime) {
         Iterator<Bullet> it = bullets.iterator();
         while (it.hasNext()) {
             Bullet bullet = it.next();
@@ -56,7 +56,7 @@ final class EnemySystem {
                 continue;
             }
 
-            for (PlayerState player : players) {
+            for (Player player : players) {
                 if (bullet.hits(player)) {
                     bullet.onHit(player);
                     it.remove();
@@ -76,10 +76,10 @@ final class EnemySystem {
     }
 
     /** Enemies like SpikyBush that damage on contact rather than by firing. */
-    private void applyContactDamage(List<PlayerState> players) {
+    private void applyContactDamage(List<Player> players) {
         for (Enemy enemy : enemies) {
             if (enemy instanceof SpikyBush bush) {
-                for (PlayerState player : players) {
+                for (Player player : players) {
                     if (bush.isTouching(player)) {
                         bush.damage(player);
                     }

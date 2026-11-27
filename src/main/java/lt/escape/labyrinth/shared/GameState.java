@@ -6,8 +6,8 @@ import java.util.List;
 public class GameState {
     private static final GameState instance = new GameState();
 
-    private final PlayerState player1;
-    private final PlayerState player2;
+    private final Player player1;
+    private final Player player2;
 
     private final List<EnemyState> enemies = new ArrayList<>();
 
@@ -28,21 +28,21 @@ public class GameState {
 
 
     private GameState() {
-        player1 = new PlayerState(1, 500, 480);
-        player2 = new PlayerState(2, 100, 480);
+        player1 = new Player(1, 500, 480);
+        player2 = new Player(2, 100, 480);
     }
 
     public static GameState getInstance() { return instance; }
 
-    public PlayerState getPlayer1() {
+    public Player getPlayer1() {
         return player1;
     }
 
-    public PlayerState getPlayer2() {
+    public Player getPlayer2() {
         return player2;
     }
 
-    public PlayerState getPlayer(int playerId) {
+    public Player getPlayer(int playerId) {
         if (playerId == 1) {
             return player1;
         }

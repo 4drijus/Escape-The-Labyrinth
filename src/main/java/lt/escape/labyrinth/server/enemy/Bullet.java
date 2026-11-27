@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.enemy;
 
 import lt.escape.labyrinth.shared.BulletType;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 import lt.escape.labyrinth.shared.Prototype;
 
 /**
@@ -40,7 +40,7 @@ public abstract class Bullet implements Prototype<Bullet> {
     }
 
     /** Called by the server when this bullet hits a player. */
-    public abstract void onHit(PlayerState player);
+    public abstract void onHit(Player player);
 
     /** Tells the client which sprite to draw for this bullet. */
     public abstract BulletType getType();
@@ -55,7 +55,7 @@ public abstract class Bullet implements Prototype<Bullet> {
     }
 
     /** Simple distance check against a player's position. */
-    public boolean hits(PlayerState player) {
+    public boolean hits(Player player) {
         double dx = player.getX() - x;
         double dy = player.getY() - y;
         return Math.sqrt(dx * dx + dy * dy) <= HIT_RADIUS;

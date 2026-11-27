@@ -1,6 +1,6 @@
 package lt.escape.labyrinth.server.world;
 
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 /**
  * Lava/fire puddle, slows the "water" character. Assumption: player 1
@@ -15,7 +15,7 @@ public class RedPuddle extends Tile {
     }
 
     @Override
-    public void onPlayerContact(PlayerState player) {
+    public void onPlayerContact(Player player) {
         if (player.getPlayerId() != 1) {
             return; // only slows the water character
         }

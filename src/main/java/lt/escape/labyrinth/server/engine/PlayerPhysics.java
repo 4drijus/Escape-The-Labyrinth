@@ -14,7 +14,7 @@ import lt.escape.labyrinth.server.level.Level;
 import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.Wall;
 import lt.escape.labyrinth.shared.PlayerCommand;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 /**
  * SUBSYSTEM: how players move. Turns commands into velocities, applies gravity,
@@ -51,12 +51,12 @@ final class PlayerPhysics {
     /**
      * Puts both players at the level's start positions, standing still.
      */
-    void placeAtStart(Level level, PlayerState player1, PlayerState player2) {
+    void placeAtStart(Level level, Player player1, Player player2) {
         place(player1, level.getPlayer1StartX(), level.getPlayer1StartY());
         place(player2, level.getPlayer2StartX(), level.getPlayer2StartY());
     }
 
-    private void place(PlayerState player, double x, double y) {
+    private void place(Player player, double x, double y) {
         synchronized (player) {
             player.setX(x);
             player.setY(y);
@@ -66,11 +66,11 @@ final class PlayerPhysics {
         }
     }
 
-    void applyCommand(PlayerState player, PlayerCommand command) {
+    void applyCommand(Player player, PlayerCommand command) {
         player.applyMovementCommand(command);
     }
 
-    void update(PlayerState player) {
+    void update(Player player) {
         synchronized (player) {
             moveHorizontally(player);
             moveVertically(player);
@@ -78,7 +78,7 @@ final class PlayerPhysics {
         }
     }
 
-    private void moveHorizontally(PlayerState player) {
+    private void moveHorizontally(Player player) {
         double newX = player.getX() + player.getVelocityX();
         newX = Math.max(0, Math.min(newX, levelWidth - PLAYER_WIDTH));
 
@@ -103,7 +103,7 @@ final class PlayerPhysics {
         player.setX(newX);
     }
 
-    private void moveVertically(PlayerState player) {
+    private void moveVertically(Player player) {
         player.setVelocityY(player.getVelocityY() + GRAVITY);
         double newY = player.getY() + player.getVelocityY();
 

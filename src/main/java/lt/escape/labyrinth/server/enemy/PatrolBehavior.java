@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.enemy;
 
 import lt.escape.labyrinth.server.world.Wall;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class PatrolBehavior implements Behavior {
     }
 
     @Override
-    public void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime) {
+    public void move(Enemy enemy, List<Player> players, List<Wall> walls, double deltaTime) {
         if (!initialized) {
             startX = enemy.getPositionX();
             initialized = true;

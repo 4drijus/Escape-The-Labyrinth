@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.enemy;
 
 import lt.escape.labyrinth.shared.EnemyType;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 /**
  * Concrete enemy. Always uses StationaryBehavior — it never needs a
@@ -35,14 +35,14 @@ public class SpikyBush extends Enemy {
         return EnemyType.SPIKY_BUSH;
     }
 
-    public boolean isTouching(PlayerState player) {
+    public boolean isTouching(Player player) {
         double dx = player.getX() - positionX;
         double dy = player.getY() - positionY;
         return Math.sqrt(dx * dx + dy * dy) <= TOUCH_RADIUS;
     }
 
     /** Called by the server when a player's hitbox overlaps this bush. */
-    public void damage(PlayerState player) {
+    public void damage(Player player) {
         player.takeDamage(damageAmount);
     }
 }

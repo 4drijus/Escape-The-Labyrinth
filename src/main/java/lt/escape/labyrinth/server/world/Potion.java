@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.world;
 
 import lt.escape.labyrinth.server.GameConstants;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 import lt.escape.labyrinth.shared.Prototype;
 
 /**
@@ -27,12 +27,12 @@ public class Potion extends GameObject implements Prototype<Potion> {
         return copy;
     }
 
-    public boolean isTouching(PlayerState player) {
+    public boolean isTouching(Player player) {
         return !collected && intersects(player.getX(), player.getY(),
                 GameConstants.PLAYER_WIDTH, GameConstants.PLAYER_HEIGHT);
     }
 
-    public void collect(PlayerState player) {
+    public void collect(Player player) {
         if (collected) {
             return;
         }

@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.world;
 
 import lt.escape.labyrinth.server.GameConstants;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 /**
  * Base class for fixed level terrain: walls, bushes, puddles. Unlike
@@ -18,12 +18,12 @@ public abstract class Tile extends GameObject {
     }
 
     /** Uses the player's whole 40x40 box, so a puddle lying on the floor is touched by a player standing on it. */
-    public boolean isTouching(PlayerState player) {
+    public boolean isTouching(Player player) {
         return intersects(player.getX(), player.getY(),
                 GameConstants.PLAYER_WIDTH, GameConstants.PLAYER_HEIGHT);
     }
 
     /** No-op by default (Wall, Bush); puddle subclasses override this. */
-    public void onPlayerContact(PlayerState player) {
+    public void onPlayerContact(Player player) {
     }
 }

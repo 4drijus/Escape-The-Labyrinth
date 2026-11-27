@@ -8,7 +8,7 @@ import lt.escape.labyrinth.server.level.Level;
 import lt.escape.labyrinth.server.world.Lift;
 import lt.escape.labyrinth.server.world.Potion;
 import lt.escape.labyrinth.server.world.Tile;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ final class InteractionSystem {
         potions = level.getPotions();
     }
 
-    void update(List<PlayerState> players, double deltaTime) {
+    void update(List<Player> players, double deltaTime) {
         applyTileEffects(players);
         collectPotions(players);
         for (Lift lift : lifts) {
@@ -71,7 +71,7 @@ final class InteractionSystem {
     }
 
     /** True (once) when both players are inside the exit zone. */
-    boolean isExitReached(List<PlayerState> players) {
+    boolean isExitReached(List<Player> players) {
         if (exit == null || exit.isGameEnded()) {
             return false;
         }
@@ -86,7 +86,7 @@ final class InteractionSystem {
      * After a checkpoint load: a player already standing on the button or
      * plate counts as already on it, so loading doesn't press it again.
      */
-    void resumeSwitches(List<PlayerState> players) {
+    void resumeSwitches(List<Player> players) {
         for (int i = 0; i < switches.size(); i++) {
             occupied[i] = anyPlayerOverlaps(players, switches.get(i));
         }
@@ -97,9 +97,9 @@ final class InteractionSystem {
     }
 
     /** Puddles and bushes -- whatever each Tile's onPlayerContact() does. */
-    private void applyTileEffects(List<PlayerState> players) {
+    private void applyTileEffects(List<Player> players) {
         for (Tile tile : tiles) {
-            for (PlayerState player : players) {
+            for (Player player : players) {
                 if (tile.isTouching(player)) {
                     tile.onPlayerContact(player);
                 }
@@ -112,12 +112,12 @@ final class InteractionSystem {
      * into its rider every tick, and PlayerPhysics pushes them off sideways
      * as soon as they try to walk.
      */
-    private void carryRiders(Lift lift, double oldTop, List<PlayerState> players) {
+    private void carryRiders(Lift lift, double oldTop, List<Player> players) {
         double dy = lift.getPositionY() - oldTop;
         if (dy == 0) {
             return;
         }
-        for (PlayerState player : players) {
+        for (Player player : players) {
             boolean standingOnIt = Math.abs(player.getY() + PLAYER_HEIGHT - oldTop) < 1
                     && player.getX() < lift.getPositionX() + lift.getWidth()
                     && player.getX() + PLAYER_WIDTH > lift.getPositionX();
@@ -127,9 +127,9 @@ final class InteractionSystem {
         }
     }
 
-    private void collectPotions(List<PlayerState> players) {
+    private void collectPotions(List<Player> players) {
         for (Potion potion : potions) {
-            for (PlayerState player : players) {
+            for (Player player : players) {
                 if (potion.isTouching(player)) {
                     potion.collect(player);
                 }
@@ -144,7 +144,7 @@ final class InteractionSystem {
      * Each switch decides what entering/leaving means (Button presses, Lever
      * pulls ...) and passes it on to whatever Mechanism it holds.
      */
-    private void checkSwitches(List<PlayerState> players) {
+    private void checkSwitches(List<Player> players) {
         for (int i = 0; i < switches.size(); i++) {
             Switch sw = switches.get(i);
             boolean nowOccupied = anyPlayerOverlaps(players, sw);
@@ -157,8 +157,8 @@ final class InteractionSystem {
         }
     }
 
-    private boolean anyPlayerOverlaps(List<PlayerState> players, InteractiveElement element) {
-        for (PlayerState player : players) {
+    private boolean anyPlayerOverlaps(List<Player> players, InteractiveElement element) {
+        for (Player player : players) {
             if (Geometry.overlaps(player.getX(), player.getY(), PLAYER_WIDTH, PLAYER_HEIGHT,
                     element.getPositionX(), element.getPositionY(), element.getWidth(), element.getHeight())) {
                 return true;

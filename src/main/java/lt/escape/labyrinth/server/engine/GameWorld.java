@@ -10,7 +10,7 @@ import lt.escape.labyrinth.server.level.LevelLayout;
 import lt.escape.labyrinth.server.level.MediumLevelBuilder;
 import lt.escape.labyrinth.shared.GameState;
 import lt.escape.labyrinth.shared.PlayerCommand;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 import java.util.List;
 
@@ -94,9 +94,9 @@ public class GameWorld {
             layoutChanged = loadCheckpoint();
         }
 
-        PlayerState player1 = state.getPlayer1();
-        PlayerState player2 = state.getPlayer2();
-        List<PlayerState> players = List.of(player1, player2);
+        Player player1 = state.getPlayer1();
+        Player player2 = state.getPlayer2();
+        List<Player> players = List.of(player1, player2);
 
         physics.update(player1);
         physics.update(player2);
@@ -132,7 +132,7 @@ public class GameWorld {
             return;
         }
 
-        PlayerState player = state.getPlayer(playerId);
+        Player player = state.getPlayer(playerId);
         if (player != null) {
             physics.applyCommand(player, command);
         }
@@ -187,7 +187,7 @@ public class GameWorld {
      * A player died: rebuild the current level and restore both players' health.
      * Prototype: the level is a fresh copy of the untouched template, not built again.
      */
-    private void restartLevel(PlayerState player1, PlayerState player2) {
+    private void restartLevel(Player player1, Player player2) {
         System.out.println("A player died -- restarting level " + levels.number());
         player1.resetHealth();
         player2.resetHealth();

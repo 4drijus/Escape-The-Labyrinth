@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.enemy;
 
 import lt.escape.labyrinth.shared.BulletType;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 public class InstaDeathBullet extends Bullet {
 
@@ -21,7 +21,7 @@ public class InstaDeathBullet extends Bullet {
     }
 
     @Override
-    public void onHit(PlayerState player) {
+    public void onHit(Player player) {
         player.setHealth(0);
     }
 

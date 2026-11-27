@@ -4,7 +4,7 @@ import lt.escape.labyrinth.server.GameConstants;
 import lt.escape.labyrinth.server.world.GameObject;
 import lt.escape.labyrinth.server.world.Wall;
 import lt.escape.labyrinth.shared.EnemyType;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.Collections;
@@ -90,7 +90,7 @@ public abstract class Enemy extends GameObject implements Prototype<Enemy> {
      * Called once per game tick by GameServer.
      * Returns any bullets spawned this tick (empty for enemies that don't shoot).
      */
-    public List<Bullet> update(List<PlayerState> players, List<Wall> walls, double deltaTime) {
+    public List<Bullet> update(List<Player> players, List<Wall> walls, double deltaTime) {
         advanceRotation(deltaTime);
 
         if (behavior != null) {

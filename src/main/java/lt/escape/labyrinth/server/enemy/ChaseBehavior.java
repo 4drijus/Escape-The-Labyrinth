@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.enemy;
 
 import lt.escape.labyrinth.server.world.Wall;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 import java.util.List;
 
@@ -30,8 +30,8 @@ public class ChaseBehavior implements Behavior {
     }
 
     @Override
-    public void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime) {
-        PlayerState target = nearest(enemy, players);
+    public void move(Enemy enemy, List<Player> players, List<Wall> walls, double deltaTime) {
+        Player target = nearest(enemy, players);
         if (target == null) {
             return;
         }
@@ -55,10 +55,10 @@ public class ChaseBehavior implements Behavior {
         }
     }
 
-    private PlayerState nearest(Enemy enemy, List<PlayerState> players) {
-        PlayerState best = null;
+    private Player nearest(Enemy enemy, List<Player> players) {
+        Player best = null;
         double bestDistance = Double.MAX_VALUE;
-        for (PlayerState player : players) {
+        for (Player player : players) {
             double distance = Math.hypot(player.getX() - enemy.getPositionX(), player.getY() - enemy.getPositionY());
             if (distance < bestDistance) {
                 bestDistance = distance;

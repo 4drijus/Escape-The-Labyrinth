@@ -1,6 +1,6 @@
 package lt.escape.labyrinth.server.world;
 
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 /**
  * "Viena iš jų žalinga vienam žaidėjui" -- water puddle, slows the
@@ -16,7 +16,7 @@ public class BluePuddle extends Tile {
     }
 
     @Override
-    public void onPlayerContact(PlayerState player) {
+    public void onPlayerContact(Player player) {
         if (player.getPlayerId() != 2) {
             return; // only slows the fire character
         }

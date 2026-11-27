@@ -11,11 +11,12 @@
 
 ## Player movement states
 
-Each `PlayerState` delegates movement commands to an idle, running, rising,
-or falling `MovementState`. `PlayerPhysics` still applies gravity and resolves
-collisions, then lets the current state react to the result. Horizontal
-velocity is independent of the airborne states. Checkpoints retain movement
-state, and restoration reconciles it with the current horizontal velocity.
+`Player` checks each movement command against its current `MovementState` and
+executes commands allowed by that state. The concrete states only define which
+commands are allowed. A shared `StateManager` selects the next state from the
+player's grounded status and velocity after commands and physics updates.
+`PlayerPhysics` still applies gravity and resolves collisions. Checkpoints
+retain movement data, and restoration recalculates the movement state.
 
 The dependency-free movement test can be run with JDK 21 or newer in
 PowerShell from the project root:

@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.enemy;
 
 import lt.escape.labyrinth.server.world.Wall;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  * Enemy.copy() copies its Behavior
  */
 public interface Behavior extends Prototype<Behavior> {
-    void move(Enemy enemy, List<PlayerState> players, List<Wall> walls, double deltaTime);
+    void move(Enemy enemy, List<Player> players, List<Wall> walls, double deltaTime);
 
     /**
      * Called by Enemy.setBehavior() whenever this strategy becomes the

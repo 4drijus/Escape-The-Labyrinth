@@ -2,7 +2,7 @@ package lt.escape.labyrinth.server;
 
 import lt.escape.labyrinth.server.enemy.Bullet;
 import lt.escape.labyrinth.server.level.Level;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.ArrayList;
@@ -20,11 +20,11 @@ import java.util.List;
 public class Checkpoint implements Prototype<Checkpoint> {
     private final int levelNumber;
     private final Level level;
-    private final PlayerState player1;
-    private final PlayerState player2;
+    private final Player player1;
+    private final Player player2;
     private final List<Bullet> bullets;
 
-    public Checkpoint(int levelNumber, Level level, PlayerState player1, PlayerState player2, List<Bullet> bullets) {
+    public Checkpoint(int levelNumber, Level level, Player player1, Player player2, List<Bullet> bullets) {
         this.levelNumber = levelNumber;
         this.level = level;
         this.player1 = player1;
@@ -49,11 +49,11 @@ public class Checkpoint implements Prototype<Checkpoint> {
         return level;
     }
 
-    public PlayerState getPlayer1() {
+    public Player getPlayer1() {
         return player1;
     }
 
-    public PlayerState getPlayer2() {
+    public Player getPlayer2() {
         return player2;
     }
 

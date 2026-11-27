@@ -1,6 +1,9 @@
 package lt.escape.labyrinth.shared;
 
-public class PlayerState implements Prototype<PlayerState> {
+public class Player implements Prototype<Player> {
+    private static final double MOVE_SPEED = 4;
+    private static final double JUMP_VELOCITY = -8;
+
     private final int playerId;
 
     private double x;
@@ -10,6 +13,7 @@ public class PlayerState implements Prototype<PlayerState> {
 
     private boolean onGround;
     private MovementState movementState = IdleState.INSTANCE;
+    private final StateManager stateManager = StateManager.INSTANCE;
 
     private int health;
 
@@ -18,7 +22,7 @@ public class PlayerState implements Prototype<PlayerState> {
     private static final int STARTING_HEALTH = 3;
     private static final long INVULNERABILITY_MS = 1000;
 
-    public PlayerState(int playerId, double x, double y) {
+    public Player(int playerId, double x, double y) {
         this.playerId = playerId;
         this.x = x;
         this.y = y;
@@ -55,15 +59,27 @@ public class PlayerState implements Prototype<PlayerState> {
     }
 
     public synchronized void applyMovementCommand(PlayerCommand command) {
-        movementState.handleCommand(this, command);
+        if (!movementState.isAllowed(command)) {
+            return;
+        }
+
+        switch (command) {
+            case LEFT -> velocityX = -MOVE_SPEED;
+            case RIGHT -> velocityX = MOVE_SPEED;
+            case STOP -> velocityX = 0;
+            case JUMP -> {
+                velocityY = JUMP_VELOCITY;
+                onGround = false;
+            }
+            case SAVE, LOAD -> {
+                return;
+            }
+        }
+        updateMovementState();
     }
 
     public synchronized void updateMovementState() {
-        movementState.afterPhysics(this);
-    }
-
-    void setMovementState(MovementState movementState) {
-        this.movementState = movementState;
+        movementState = stateManager.nextState(this);
     }
 
     public int getHealth() {
@@ -114,8 +130,8 @@ public class PlayerState implements Prototype<PlayerState> {
     }
 
     @Override
-    public synchronized PlayerState copy() {
-        PlayerState copy = new PlayerState(playerId, x, y);
+    public synchronized Player copy() {
+        Player copy = new Player(playerId, x, y);
         copy.velocityX = velocityX;
         copy.velocityY = velocityY;
         copy.onGround = onGround;
@@ -129,7 +145,7 @@ public class PlayerState implements Prototype<PlayerState> {
      * Loads a checkpoint into this player. velocityX is kept: it follows the
      * keys held right now, not the ones held when the checkpoint was saved.
      */
-    public synchronized void restoreFrom(PlayerState saved) {
+    public synchronized void restoreFrom(Player saved) {
         this.x = saved.x;
         this.y = saved.y;
         this.velocityY = saved.velocityY;

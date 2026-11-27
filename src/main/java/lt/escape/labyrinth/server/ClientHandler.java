@@ -3,7 +3,7 @@ package lt.escape.labyrinth.server;
 import lt.escape.labyrinth.server.engine.GameWorld;
 import lt.escape.labyrinth.shared.GameState;
 import lt.escape.labyrinth.shared.PlayerCommand;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 import lt.escape.labyrinth.shared.EnemyState;
 import lt.escape.labyrinth.shared.BulletState;
 import lt.escape.labyrinth.shared.WallState;
@@ -165,8 +165,8 @@ public class ClientHandler implements Runnable {
             return;
         }
 
-        PlayerState player1 = gameState.getPlayer1();
-        PlayerState player2 = gameState.getPlayer2();
+        Player player1 = gameState.getPlayer1();
+        Player player2 = gameState.getPlayer2();
 
         StringBuilder message = new StringBuilder("STATE:");
         message.append(player1.getPlayerId()).append(",")

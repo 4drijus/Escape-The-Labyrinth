@@ -1,7 +1,7 @@
 package lt.escape.labyrinth.server.interactive;
 
 import lt.escape.labyrinth.server.GameConstants;
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 import lt.escape.labyrinth.shared.Prototype;
 
 import java.util.List;
@@ -25,8 +25,8 @@ public class Exit extends InteractiveElement implements Prototype<Exit> {
         return copy;
     }
 
-    public boolean checkPlayerAmount(List<PlayerState> players) {
-        for (PlayerState player : players) {
+    public boolean checkPlayerAmount(List<Player> players) {
+        for (Player player : players) {
             if (!isInside(player)) {
                 return false;
             }
@@ -38,7 +38,7 @@ public class Exit extends InteractiveElement implements Prototype<Exit> {
      * A player counts as "in the exit" when the centre of their 40x40 box is
      * inside the zone.
      */
-    private boolean isInside(PlayerState player) {
+    private boolean isInside(Player player) {
         double centerX = player.getX() + GameConstants.PLAYER_WIDTH / 2;
         double centerY = player.getY() + GameConstants.PLAYER_HEIGHT / 2;
         return centerX >= getPositionX() && centerX <= getPositionX() + getWidth()

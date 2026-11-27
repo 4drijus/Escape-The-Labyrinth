@@ -10,7 +10,7 @@ import lt.escape.labyrinth.shared.Prototype;
  * moveRight()/moveLeft() are no-ops: the interface asks for all four
  * directions but this object is vertical-only by design.
  *
- * NOTE: this only moves the lift's own position. Making a PlayerState
+ * NOTE: this only moves the lift's own position. Making a Player
  * ride along with it (detect standing on top, carry them each tick)
  * isn't implemented here -- that's a separate player-physics feature.
  *

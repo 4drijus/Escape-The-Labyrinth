@@ -1,6 +1,6 @@
 package lt.escape.labyrinth.server.world;
 
-import lt.escape.labyrinth.shared.PlayerState;
+import lt.escape.labyrinth.shared.Player;
 
 /** "Juoda bala žalinga abiejiems žaidėjams" -- harmful to both players, no exceptions. */
 public class BlackPuddle extends Tile {
@@ -12,7 +12,7 @@ public class BlackPuddle extends Tile {
     }
 
     @Override
-    public void onPlayerContact(PlayerState player) {
+    public void onPlayerContact(Player player) {
         player.takeDamage(damageAmount);
     }
 }
